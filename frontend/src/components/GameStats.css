@@ -1,78 +1,63 @@
-.stats-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+.stats-loading {
+  @apply flex items-center gap-3 py-12 text-primary/60
+         font-label text-sm uppercase tracking-widest;
 }
 
-.charts-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 1rem;
+.stats-error {
+  @apply bg-error-container text-on-error-container rounded-sm p-4 font-body text-sm;
 }
 
-.chart-card {
-  min-height: 280px;
+/* ── Section cards ─────────────────────────────────────── */
+
+.stats-section {
+  @apply content-card p-8;
 }
 
-.color-perf {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+#stats-overview {
+  @apply col-span-12 lg:col-span-8 content-card p-8;
 }
 
-.color-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
+#stats-perf-matrix {
+  @apply col-span-12 lg:col-span-4 content-card p-8 flex flex-col items-center justify-center;
 }
 
-.color-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  flex-shrink: 0;
+/* ── StatCard sub-component ────────────────────────────── */
+
+.stat-card {
+  @apply bg-surface-container-high rounded-sm p-4 text-center;
 }
 
-.white-dot { background: #f0f0f0; }
-.black-dot { background: #4a4a4a; }
-
-.opening-table {
-  overflow-x: auto;
+.stat-value {
+  @apply font-headline text-2xl font-bold;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
+.stat-value-default { @apply text-primary; }
+.stat-value-win     { @apply text-chess-success; }
+.stat-value-loss    { @apply text-chess-danger; }
+.stat-value-draw    { @apply text-primary/60; }
+
+.stat-inner-label {
+  @apply font-label text-[10px] uppercase tracking-widest text-primary/50 mt-1;
 }
 
-th {
-  text-align: left;
-  padding: 0.6rem 0.75rem;
-  color: var(--text-muted);
-  font-weight: 600;
-  border-bottom: 1px solid var(--border);
-  white-space: nowrap;
+/* ── ColorPerfCard sub-component ───────────────────────── */
+
+.color-perf-item {
+  @apply flex items-center gap-4 p-4 bg-surface-container-high rounded-sm;
 }
 
-td {
-  padding: 0.6rem 0.75rem;
-  border-bottom: 1px solid rgba(42, 58, 92, 0.5);
+.color-icon-box {
+  @apply w-8 h-8 rounded-sm flex items-center justify-center;
+}
+.color-icon-box--white { @apply bg-surface-container-lowest border border-primary/20; }
+.color-icon-box--black { @apply bg-primary; }
+
+/* ── Opening bar ───────────────────────────────────────── */
+
+.opening-bar-track {
+  @apply h-1.5 w-full bg-surface-variant rounded-full overflow-hidden;
 }
 
-tr:last-child td { border-bottom: none; }
-
-td.win { color: var(--success); }
-td.loss { color: var(--danger); }
-td.draw { color: var(--draw); }
-
-.loading-state,
-.error-state {
-  padding: 2rem;
-  text-align: center;
-  color: var(--text-muted);
+.opening-bar-fill {
+  @apply h-full bg-primary transition-all duration-500;
 }
-
-.error-state { color: var(--danger); }

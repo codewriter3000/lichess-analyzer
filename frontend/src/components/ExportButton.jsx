@@ -6,7 +6,6 @@ export default function ExportButton({ username, disabled }) {
       ? `/api/export/csv?username=${encodeURIComponent(username)}`
       : '/api/export/csv';
 
-    // Create a temporary link to trigger the download
     const a = document.createElement('a');
     a.href = url;
     a.download = 'chess-games.csv';
@@ -17,12 +16,13 @@ export default function ExportButton({ username, disabled }) {
 
   return (
     <button
-      className="btn btn-primary export-btn"
+      id="export-btn"
       onClick={handleExport}
       disabled={disabled}
       title="Export games as CSV"
     >
-      ⬇ Export CSV
+      <span className="material-symbols-outlined text-sm">download</span>
+      Export CSV
     </button>
   );
 }

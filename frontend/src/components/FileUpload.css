@@ -1,42 +1,10 @@
-.upload-area {
-  border: 2px dashed var(--border);
-  border-radius: 12px;
-  padding: 2rem;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s;
-  background: var(--bg-card);
+.upload-dropzone {
+  @apply border-2 border-dashed rounded-sm p-10 text-center cursor-pointer
+         transition-all duration-200 border-primary/20 bg-surface-container;
 }
-
-.upload-area:hover,
-.upload-area.dragging {
-  border-color: var(--primary);
-  background: rgba(118, 150, 86, 0.08);
-}
+.upload-dropzone:hover { @apply border-primary/40 bg-primary/5; }
+.upload-dropzone.dragging { @apply border-primary bg-primary/5; }
 
 .upload-inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.upload-icon {
-  font-size: 2.5rem;
-}
-
-.upload-text {
-  font-size: 1.05rem;
-  color: #fff;
-}
-
-.upload-hint {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-}
-
-.upload-error {
-  color: var(--danger);
-  font-size: 0.9rem;
-  margin-top: 0.25rem;
+  @apply flex flex-col items-center gap-3;
 }

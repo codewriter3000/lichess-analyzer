@@ -9,7 +9,7 @@ import './App.css';
 export default function App() {
   const [games, setGames] = useState([]);
   const [username, setUsername] = useState('');
-  const [activeTab, setActiveTab] = useState('stats');
+  const [activeTab, setActiveTab] = useState('library');
   const [selectedGame, setSelectedGame] = useState(null);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -17,7 +17,7 @@ export default function App() {
   function handleUpload(uploadedGames, inferredUsername = '') {
     setGames(uploadedGames);
     setUsername(inferredUsername);
-    setActiveTab('stats');
+    setActiveTab('library');
     setSelectedGame(null);
     setAnalysisResult(null);
   }
@@ -45,80 +45,169 @@ export default function App() {
     }
   }
 
-  const tabs = [
-    { id: 'stats', label: '📊 Stats' },
-    { id: 'games', label: '♟ Games' },
-    { id: 'analysis', label: '🔍 Analysis' },
+  const navItems = [
+    { id: 'library',     icon: 'library_books', label: 'Library'     },
+    { id: 'analysis',    icon: 'query_stats',   label: 'Analysis'    },
+    { id: 'statistics',  icon: 'auto_graph',    label: 'Statistics'  },
+    { id: 'manuscripts', icon: 'history_edu',   label: 'Manuscripts' },
   ];
 
+  const PAGE_LABELS = {
+    library:     { section: 'Game Collection',   title: 'Library'     },
+    analysis:    { section: 'Stockfish Engine',   title: 'Analysis'    },
+    statistics:  { section: 'Performance Record', title: 'Statistics'  },
+    manuscripts: { section: 'Upload Archive',     title: 'Manuscripts' },
+  };
+
   return (
-    <div className="app">
-      <header className="app-header">
-        <div className="header-content">
-          <h1 className="logo">♟ Lichess Analyzer</h1>
-          <p className="subtitle">Parse your PGN files, get stats & Stockfish analysis</p>
+    <div className="app-root">
+      {/* TopAppBar */}
+      <header id="app-topbar">
+        <div className="flex items-center gap-4">
+          <span className="font-headline text-2xl italic text-primary">The Scholar's Ledger</span>
+        </div>
+        <nav className="hidden md:flex items-center gap-8">
+          <button className="topnav-btn" onClick={() => setActiveTab('library')}>Library</button>
+          <button className="topnav-btn" onClick={() => setActiveTab('analysis')}>Analysis</button>
+          <button className="topnav-btn" onClick={() => setActiveTab('statistics')}>Statistics</button>
+        </nav>
+        <div className="flex items-center gap-6">
+          <span className="material-symbols-outlined topbar-icon-btn">menu_book</span>
+          <span className="material-symbols-outlined topbar-icon-btn">settings</span>
+          <div id="topbar-avatar">
+            <span className="material-symbols-outlined text-on-primary text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>person</span>
+          </div>
         </div>
       </header>
 
-      <main className="app-main">
-        <div className="upload-section">
-          <FileUpload onUpload={handleUpload} />
+      {/* SideNavBar */}
+      <aside id="app-sidebar">
+        <div className="p-6 flex flex-col gap-1">
+          <div className="flex items-center gap-3 mb-4">
+            <div id="sidebar-icon-box">
+              <span className="material-symbols-outlined text-on-primary" style={{ fontVariationSettings: "'FILL' 1" }}>shield</span>
+            </div>
+            <div>
+              <h3 className="font-headline text-primary text-lg leading-tight">Master's Study</h3>
+              {username && <p className="sidebar-field-label">{username}</p>}
+            </div>
+          </div>
+          <label htmlFor="pgn-upload-sidebar" id="new-analysis-btn">New Analysis</label>
+        </div>
+
+        <nav className="flex-1 px-4 space-y-1">
+          {navItems.map(item => (
+            <button
+              key={item.id}
+              onClick={() => setActiveTab(item.id)}
+              className={`sidenav-btn${activeTab === item.id ? ' active' : ''}`}
+            >
+              <span className="material-symbols-outlined">{item.icon}</span>
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </nav>
+
+        <div className="p-4 border-t border-primary/5">
           {games.length > 0 && (
-            <div className="username-row">
-              <label htmlFor="username">Your username (for personalized stats):</label>
+            <div className="mb-3 px-4">
+              <label className="sidebar-field-label">Username</label>
               <input
-                id="username"
                 type="text"
                 value={username}
                 onChange={e => setUsername(e.target.value)}
                 placeholder="e.g. Magnus"
-                className="username-input"
+                className="sidebar-username-input"
               />
+            </div>
+          )}
+          {games.length > 0 && (
+            <div className="px-4 mb-2">
               <ExportButton username={username} disabled={games.length === 0} />
             </div>
           )}
+          <button id="engine-settings-btn">
+            <span className="material-symbols-outlined">memory</span>
+            <span className="font-label text-sm uppercase tracking-wide">Engine Settings</span>
+          </button>
         </div>
+      </aside>
 
-        {games.length > 0 && (
-          <>
-            <nav className="tabs">
-              {tabs.map(tab => (
-                <button
-                  key={tab.id}
-                  className={`tab-btn ${activeTab === tab.id ? 'active' : ''}`}
-                  onClick={() => setActiveTab(tab.id)}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </nav>
+      {/* Main Content Canvas */}
+      <main id="app-main">
+        <div className="parchment-overlay"></div>
+        <div className="relative z-10 max-w-7xl mx-auto">
 
-            <div className="tab-content">
-              {activeTab === 'stats' && (
-                <GameStats username={username} gameCount={games.length} />
-              )}
-              {activeTab === 'games' && (
-                <GameList
-                  games={games}
-                  selectedGame={selectedGame}
-                  onSelectGame={idx => {
-                    setSelectedGame(idx);
-                  }}
-                  onAnalyze={handleAnalyze}
-                  isAnalyzing={isAnalyzing}
-                />
-              )}
-              {activeTab === 'analysis' && (
-                <StockfishAnalysis
-                  result={analysisResult}
-                  game={selectedGame !== null ? games[selectedGame] : null}
-                  isAnalyzing={isAnalyzing}
-                />
+          {/* Page header */}
+          <div id="page-header-row">
+            <div>
+              <span className="page-section-label">{PAGE_LABELS[activeTab]?.section}</span>
+              <h1 className="font-headline text-4xl font-bold text-primary tracking-tight">
+                {PAGE_LABELS[activeTab]?.title}
+              </h1>
+              {username && (
+                <p className="font-headline italic text-lg text-primary/60 mt-1">{username}</p>
               )}
             </div>
-          </>
-        )}
+            {games.length > 0 && (
+              <div className="flex gap-4">
+                <div id="total-games-card">
+                  <span className="total-games-label">Total Games</span>
+                  <span className="font-headline text-3xl font-bold text-primary">{games.length}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Content area */}
+          {(activeTab === 'manuscripts' || games.length === 0) && (
+            <div id="upload-section-card">
+              <h2 className="font-headline text-xl text-primary mb-6">Upload PGN Archive</h2>
+              <FileUpload onUpload={handleUpload} uploadId="pgn-upload-sidebar" />
+            </div>
+          )}
+
+          {games.length > 0 && activeTab === 'library' && (
+            <GameList
+              games={games}
+              selectedGame={selectedGame}
+              onSelectGame={idx => setSelectedGame(idx)}
+              onAnalyze={handleAnalyze}
+              isAnalyzing={isAnalyzing}
+            />
+          )}
+
+          {games.length > 0 && activeTab === 'statistics' && (
+            <GameStats username={username} gameCount={games.length} />
+          )}
+
+          {activeTab === 'analysis' && (
+            <StockfishAnalysis
+              result={analysisResult}
+              game={selectedGame !== null ? games[selectedGame] : null}
+              isAnalyzing={isAnalyzing}
+            />
+          )}
+        </div>
       </main>
+
+      {/* FAB */}
+      <label htmlFor="pgn-upload-fab" id="app-fab" title="Upload PGN">
+        <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>add</span>
+      </label>
+      <input
+        id="pgn-upload-fab"
+        type="file"
+        accept=".pgn"
+        className="hidden"
+        onChange={e => {
+          if (e.target.files?.[0]) {
+            const event = new CustomEvent('pgn-file-selected', { detail: e.target.files[0] });
+            window.dispatchEvent(event);
+            e.target.value = '';
+          }
+        }}
+      />
     </div>
   );
 }
