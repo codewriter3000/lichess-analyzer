@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const { parsePgn, inferUsername } = require('../services/pgnParser');
 const { computeStats } = require('../services/statsService');
 const { buildCsv } = require('../services/csvExport');
+const { getGamePhase, classifyTacticType } = require('../services/stockfishService');
 
 // Sample PGN with 2 games
 const SAMPLE_PGN = `[Event "Rated Bullet game"]
@@ -224,5 +225,73 @@ describe('CSV Export', () => {
     const games = parsePgn(drawPgn);
     const csv = buildCsv(games, null);
     assert.ok(csv.includes('Draw'));
+  });
+});
+
+// Starting position FEN (white to move, move 0 = opening)
+const START_FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+
+describe('Stockfish Service – getGamePhase', () => {
+  it('returns opening for half-move index 0 (start)', () => {
+    assert.equal(getGamePhase(START_FEN, 0), 'opening');
+  });
+
+  it('returns opening for half-move index 19', () => {
+    assert.equal(getGamePhase(START_FEN, 19), 'opening');
+  });
+
+  it('returns middlegame for half-move index 20 with many pieces on board', () => {
+    // After ~10 full moves both sides still have most pieces – should be middlegame
+    assert.equal(getGamePhase(START_FEN, 20), 'middlegame');
+  });
+
+  it('returns endgame when only kings and 2 rooks remain', () => {
+    // No queens, 2 rooks total (≤ 6 major/minor pieces, 0 queens) → endgame
+    const endgameFen = '4r3/8/4k3/8/8/4K3/8/4R3 w - - 0 60';
+    assert.equal(getGamePhase(endgameFen, 40), 'endgame');
+  });
+
+  it('returns endgame when ≤ 4 major/minor pieces remain regardless of queens', () => {
+    // 2 rooks total (≤ 4 major/minor pieces)
+    const fewPiecesFen = '8/8/4k3/8/R7/4K3/8/r7 w - - 0 50';
+    assert.equal(getGamePhase(fewPiecesFen, 30), 'endgame');
+  });
+});
+
+describe('Stockfish Service – classifyTacticType', () => {
+  it('returns null for null or (none) move', () => {
+    assert.equal(classifyTacticType(null, START_FEN), null);
+    assert.equal(classifyTacticType('(none)', START_FEN), null);
+  });
+
+  it('returns null for a quiet pawn push', () => {
+    // e2e4 – no capture, no check, no fork (knight on e4 doesn't attack 2+ pieces from start)
+    assert.equal(classifyTacticType('e2e4', START_FEN), null);
+  });
+
+  it('returns promotion for a pawn promotion move', () => {
+    // White pawn on e7, black king far away – e7e8q
+    const promotionFen = '8/4P3/8/8/8/8/8/4K2k w - - 0 1';
+    assert.equal(classifyTacticType('e7e8q', promotionFen), 'promotion');
+  });
+
+  it('returns checkmate for a mating move', () => {
+    // Scholar's mate position: Qh5xf7#
+    const mateFen = 'r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4';
+    assert.equal(classifyTacticType('h5f7', mateFen), 'checkmate');
+  });
+
+  it('returns check for a checking move that is not checkmate', () => {
+    // White queen on d1 moves to d7, checking the black king on d8.
+    // The king can capture the queen (undefended), so it is not checkmate.
+    const checkFen = '3k4/8/8/8/8/8/8/3Q3K w - - 0 1';
+    assert.equal(classifyTacticType('d1d7', checkFen), 'check');
+  });
+
+  it('returns capture for a plain piece exchange (rook takes rook)', () => {
+    // White rook on e1 captures the black rook on e4. The rook lands on e4 and
+    // neither checks the black king on h5 (different rank and file) nor creates a fork.
+    const captureFen = '8/8/8/7k/4r3/8/8/4R2K w - - 0 1';
+    assert.equal(classifyTacticType('e1e4', captureFen), 'capture');
   });
 });

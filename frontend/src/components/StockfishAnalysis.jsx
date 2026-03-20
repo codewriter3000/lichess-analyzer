@@ -21,7 +21,7 @@ export default function StockfishAnalysis({ result, game, isAnalyzing }) {
     );
   }
 
-  const { moves, whiteAccuracy, blackAccuracy, summary } = result;
+  const { moves, whiteAccuracy, blackAccuracy, summary, phaseAccuracy, tacticAccuracy } = result;
 
   // Build eval chart data
   const chartData = moves.map((m, i) => ({
@@ -34,6 +34,9 @@ export default function StockfishAnalysis({ result, game, isAnalyzing }) {
   if (moves.length > 0 && moves[0].evalBefore !== null) {
     chartData.unshift({ name: 'Start', eval: clampEval(moves[0].evalBefore), color: null });
   }
+
+  const whiteName = game?.white ?? 'White';
+  const blackName = game?.black ?? 'Black';
 
   return (
     <div className="analysis">
@@ -49,14 +52,36 @@ export default function StockfishAnalysis({ result, game, isAnalyzing }) {
         </div>
       )}
 
-      {/* Accuracy summary */}
+      {/* Overall accuracy summary */}
       <div className="card">
         <h2>Accuracy</h2>
         <div className="accuracy-row">
-          <AccuracyBlock label={game?.white ?? 'White'} accuracy={whiteAccuracy} color="white" summary={summary} side="white" />
-          <AccuracyBlock label={game?.black ?? 'Black'} accuracy={blackAccuracy} color="black" summary={summary} side="black" />
+          <AccuracyBlock label={whiteName} accuracy={whiteAccuracy} color="white" summary={summary} side="white" />
+          <AccuracyBlock label={blackName} accuracy={blackAccuracy} color="black" summary={summary} side="black" />
         </div>
       </div>
+
+      {/* Per-phase accuracy */}
+      {phaseAccuracy && (
+        <div className="card">
+          <h2>Accuracy by Phase</h2>
+          <div className="phase-accuracy-grid">
+            <PhaseAccuracyTable label={whiteName} phaseData={phaseAccuracy.white} color="white" />
+            <PhaseAccuracyTable label={blackName} phaseData={phaseAccuracy.black} color="black" />
+          </div>
+        </div>
+      )}
+
+      {/* Tactic accuracy */}
+      {tacticAccuracy && (
+        <div className="card">
+          <h2>Tactic Accuracy</h2>
+          <div className="tactic-accuracy-grid">
+            <TacticAccuracyBlock label={whiteName} tacticData={tacticAccuracy.white} color="white" />
+            <TacticAccuracyBlock label={blackName} tacticData={tacticAccuracy.black} color="black" />
+          </div>
+        </div>
+      )}
 
       {/* Evaluation chart */}
       {chartData.length > 1 && (
@@ -138,6 +163,91 @@ function AccuracyBlock({ label, accuracy, color, summary, side }) {
   );
 }
 
+const PHASE_LABELS = { opening: 'Opening', middlegame: 'Middlegame', endgame: 'Endgame' };
+
+function PhaseAccuracyTable({ label, phaseData, color }) {
+  return (
+    <div className={`phase-accuracy-block phase-${color}`}>
+      <div className="phase-player-label">{label}</div>
+      <table className="phase-table">
+        <tbody>
+          {Object.entries(PHASE_LABELS).map(([key, display]) => {
+            const val = phaseData?.[key];
+            const accColor = val === null ? '#8a9bb5'
+              : val >= 90 ? '#27ae60'
+              : val >= 70 ? '#f39c12'
+              : '#e74c3c';
+            return (
+              <tr key={key}>
+                <td className="phase-name">{display}</td>
+                <td className="phase-val" style={{ color: accColor }}>
+                  {val !== null ? `${val}%` : '—'}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+const TACTIC_LABELS = {
+  checkmate: '# Checkmate',
+  check: '+ Check',
+  fork: '⑂ Fork',
+  sacrifice: '✕ Sacrifice',
+  capture: '× Capture',
+  promotion: '♛ Promotion',
+};
+
+function TacticAccuracyBlock({ label, tacticData, color }) {
+  const total = (tacticData?.found ?? 0) + (tacticData?.missed ?? 0);
+  const foundPct = total > 0 ? Math.round((tacticData.found / total) * 100) : null;
+  const pctColor = foundPct === null ? '#8a9bb5'
+    : foundPct >= 75 ? '#27ae60'
+    : foundPct >= 50 ? '#f39c12'
+    : '#e74c3c';
+
+  const byType = tacticData?.byType ?? {};
+  const types = Object.keys(byType).sort();
+
+  return (
+    <div className={`tactic-block tactic-${color}`}>
+      <div className="tactic-player-label">{label}</div>
+      <div className="tactic-summary">
+        <span className="tactic-found">✔ {tacticData?.found ?? 0} found</span>
+        <span className="tactic-missed">✘ {tacticData?.missed ?? 0} missed</span>
+        {foundPct !== null && (
+          <span className="tactic-pct" style={{ color: pctColor }}>{foundPct}%</span>
+        )}
+      </div>
+      {types.length > 0 && (
+        <table className="tactic-type-table">
+          <tbody>
+            {types.map(type => {
+              const { found, missed } = byType[type];
+              const total = found + missed;
+              const pct = total > 0 ? Math.round((found / total) * 100) : 0;
+              return (
+                <tr key={type}>
+                  <td className="tactic-type-name">{TACTIC_LABELS[type] ?? type}</td>
+                  <td className="tactic-type-found">✔{found}</td>
+                  <td className="tactic-type-missed">✘{missed}</td>
+                  <td className="tactic-type-pct">{pct}%</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
+      {types.length === 0 && (
+        <p className="tactic-none">No tactical moments detected.</p>
+      )}
+    </div>
+  );
+}
+
 function MoveCell({ move }) {
   if (!move) return <><td /><td /><td /><td /></>;
   const evalStr = move.evalAfter !== null
@@ -146,7 +256,15 @@ function MoveCell({ move }) {
 
   return (
     <>
-      <td className={`move-san ${move.classification}`}>{move.san}</td>
+      <td className={`move-san ${move.classification}`}>
+        {move.san}
+        {move.tactic && (
+          <span className={`tactic-icon tactic-icon-${move.tactic.found ? 'found' : 'missed'}`}
+            title={`${move.tactic.found ? 'Tactic found' : 'Tactic missed'}: ${move.tactic.type}`}>
+            {move.tactic.found ? '★' : '☆'}
+          </span>
+        )}
+      </td>
       <td className="move-eval">{evalStr}</td>
       <td className="move-cpl">{move.cploss > 0 ? `-${move.cploss}` : '0'}</td>
       <td>
