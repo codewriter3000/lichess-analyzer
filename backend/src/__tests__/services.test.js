@@ -1,6 +1,6 @@
 const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
-const { parsePgn } = require('../services/pgnParser');
+const { parsePgn, inferUsername } = require('../services/pgnParser');
 const { computeStats } = require('../services/statsService');
 const { buildCsv } = require('../services/csvExport');
 
@@ -86,6 +86,25 @@ describe('PGN Parser', () => {
     const games = parsePgn(singleGame);
     assert.equal(games.length, 1);
     assert.equal(games[0].result, '1/2-1/2');
+  });
+
+  it('infers username from repeated player appearances', () => {
+    const games = [
+      { white: 'Magnus', black: 'Hikaru' },
+      { white: 'Levon', black: 'Magnus' },
+      { white: 'Magnus', black: 'Alireza' },
+    ];
+    const inferred = inferUsername(games);
+    assert.equal(inferred, 'Magnus');
+  });
+
+  it('returns null when top player frequency is tied', () => {
+    const games = [
+      { white: 'Alice', black: 'Bob' },
+      { white: 'Alice', black: 'Bob' },
+    ];
+    const inferred = inferUsername(games);
+    assert.equal(inferred, null);
   });
 });
 

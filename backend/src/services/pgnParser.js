@@ -93,4 +93,35 @@ function parseDate(dateStr) {
   return dateStr;
 }
 
-module.exports = { parsePgn };
+/**
+ * Infer a likely primary player from parsed games.
+ * Returns null when inference is ambiguous.
+ */
+function inferUsername(games) {
+  if (!Array.isArray(games) || games.length === 0) return null;
+
+  const counts = new Map();
+
+  for (const game of games) {
+    const players = [game.white, game.black];
+    for (const name of players) {
+      if (!name || name === 'Unknown') continue;
+      const key = name.toLowerCase();
+      const item = counts.get(key) || { name, count: 0 };
+      item.count += 1;
+      counts.set(key, item);
+    }
+  }
+
+  if (counts.size === 0) return null;
+
+  const ranked = [...counts.values()].sort((a, b) => b.count - a.count);
+  if (ranked.length === 1) return ranked[0].name;
+
+  // Avoid guessing when multiple players have the same top frequency.
+  if (ranked[0].count === ranked[1].count) return null;
+
+  return ranked[0].name;
+}
+
+module.exports = { parsePgn, inferUsername };

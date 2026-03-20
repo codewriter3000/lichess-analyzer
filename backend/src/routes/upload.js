@@ -1,6 +1,6 @@
 const express = require('express');
 const multer = require('multer');
-const { parsePgn } = require('../services/pgnParser');
+const { parsePgn, inferUsername } = require('../services/pgnParser');
 
 const router = express.Router();
 const upload = multer({
@@ -24,6 +24,7 @@ router.post('/', upload.single('pgn'), (req, res) => {
 
   const pgnText = req.file.buffer.toString('utf8');
   const games = parsePgn(pgnText);
+  const inferredUsername = inferUsername(games);
 
   if (games.length === 0) {
     return res.status(400).json({ error: 'No valid games found in PGN file' });
@@ -32,10 +33,12 @@ router.post('/', upload.single('pgn'), (req, res) => {
   // Store in app-level store
   req.app.locals.games = games;
   req.app.locals.pgnText = pgnText;
+  req.app.locals.username = inferredUsername;
 
   res.json({
     message: `Parsed ${games.length} game(s)`,
     total: games.length,
+    username: inferredUsername,
     games: games.map((g, i) => ({
       index: i,
       white: g.white,

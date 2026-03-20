@@ -14,8 +14,9 @@ export default function App() {
   const [analysisResult, setAnalysisResult] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  function handleUpload(uploadedGames) {
+  function handleUpload(uploadedGames, inferredUsername = '') {
     setGames(uploadedGames);
+    setUsername(inferredUsername);
     setActiveTab('stats');
     setSelectedGame(null);
     setAnalysisResult(null);

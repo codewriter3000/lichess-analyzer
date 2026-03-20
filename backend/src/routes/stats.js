@@ -11,7 +11,8 @@ router.get('/', (req, res) => {
     return res.status(404).json({ error: 'No games loaded. Please upload a PGN file first.' });
   }
 
-  const username = req.query.username || null;
+  const username = req.query.username || req.app.locals.username || null;
+  console.log(`Computing stats for username: ${username}`);
   const stats = computeStats(games, username);
   res.json(stats);
 });

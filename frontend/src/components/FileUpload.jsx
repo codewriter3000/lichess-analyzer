@@ -33,7 +33,7 @@ export default function FileUpload({ onUpload }) {
         throw new Error(data.error || 'Upload failed');
       }
 
-      onUpload(data.games);
+      onUpload(data.games, data.username || '');
     } catch (err) {
       setError(err.message);
     } finally {

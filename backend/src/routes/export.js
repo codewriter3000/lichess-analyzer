@@ -11,7 +11,7 @@ router.get('/csv', (req, res) => {
     return res.status(404).json({ error: 'No games loaded. Please upload a PGN file first.' });
   }
 
-  const username = req.query.username || null;
+  const username = req.query.username || req.app.locals.username || null;
   const csv = buildCsv(games, username);
 
   res.setHeader('Content-Type', 'text/csv');
