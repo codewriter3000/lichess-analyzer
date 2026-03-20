@@ -1,36 +1,39 @@
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine,
 } from 'recharts';
-import './StockfishAnalysis.css';
 
 export default function StockfishAnalysis({ result, game, isAnalyzing }) {
   if (isAnalyzing) {
     return (
-      <div className="analysis-loading">
+      <div className="bg-surface-container rounded-sm p-12 shadow-sm flex flex-col items-center gap-4">
         <span className="spinner" />
-        <p>Running Stockfish analysis… this may take up to a minute.</p>
+        <p className="font-label text-sm uppercase tracking-widest text-primary/60">
+          Running Stockfish analysis… this may take up to a minute.
+        </p>
       </div>
     );
   }
 
   if (!result) {
     return (
-      <div className="analysis-empty">
-        <p>Select a game from the Games tab and click <strong>🔍 Analyze</strong> to see Stockfish analysis.</p>
+      <div className="bg-surface-container rounded-sm p-12 shadow-sm flex flex-col items-center gap-4">
+        <span className="material-symbols-outlined text-5xl text-primary/20">search</span>
+        <p className="font-body text-primary/60 text-center">
+          Select a game from the <strong className="font-semibold text-primary">Library</strong> tab and click{' '}
+          <strong className="font-semibold text-primary">Analyze</strong> to see Stockfish analysis.
+        </p>
       </div>
     );
   }
 
   const { moves, whiteAccuracy, blackAccuracy, summary, phaseAccuracy, tacticAccuracy } = result;
 
-  // Build eval chart data
-  const chartData = moves.map((m, i) => ({
+  const chartData = moves.map(m => ({
     name: `${m.moveNumber}${m.color === 'white' ? '.' : '…'}${m.san}`,
     eval: clampEval(m.evalAfter),
     color: m.color,
   }));
 
-  // Add starting position eval
   if (moves.length > 0 && moves[0].evalBefore !== null) {
     chartData.unshift({ name: 'Start', eval: clampEval(moves[0].evalBefore), color: null });
   }
@@ -39,99 +42,111 @@ export default function StockfishAnalysis({ result, game, isAnalyzing }) {
   const blackName = game?.black ?? 'Black';
 
   return (
-    <div className="analysis">
+    <div className="space-y-6">
+      {/* Game header */}
       {game && (
-        <div className="card analysis-header">
-          <h2>
+        <div className="bg-surface-container rounded-sm p-6 shadow-sm">
+          <h2 className="font-headline text-xl text-primary">
             {game.white} ({game.whiteElo ?? '?'}) vs {game.black} ({game.blackElo ?? '?'})
           </h2>
-          <p className="game-info">
+          <p className="font-body text-sm text-primary/60 mt-1">
             {game.date && <span>{game.date}</span>}
             {game.opening && <span> · {game.opening}</span>}
           </p>
         </div>
       )}
 
-      {/* Overall accuracy summary */}
-      <div className="card">
-        <h2>Accuracy</h2>
-        <div className="accuracy-row">
-          <AccuracyBlock label={whiteName} accuracy={whiteAccuracy} color="white" summary={summary} side="white" />
-          <AccuracyBlock label={blackName} accuracy={blackAccuracy} color="black" summary={summary} side="black" />
+      {/* Accuracy summary */}
+      <div className="bg-surface-container rounded-sm p-8 shadow-sm">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="font-headline text-lg text-primary">Accuracy</h3>
+          <span className="material-symbols-outlined text-secondary">analytics</span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <AccuracyBlock label={whiteName} accuracy={whiteAccuracy} summary={summary} side="white" />
+          <AccuracyBlock label={blackName} accuracy={blackAccuracy} summary={summary} side="black" />
         </div>
       </div>
 
-      {/* Per-phase accuracy */}
+      {/* Phase accuracy */}
       {phaseAccuracy && (
-        <div className="card">
-          <h2>Accuracy by Phase</h2>
-          <div className="phase-accuracy-grid">
-            <PhaseAccuracyTable label={whiteName} phaseData={phaseAccuracy.white} color="white" />
-            <PhaseAccuracyTable label={blackName} phaseData={phaseAccuracy.black} color="black" />
+        <div className="bg-surface-container rounded-sm p-8 shadow-sm">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="font-headline text-lg text-primary">Accuracy by Phase</h3>
+            <span className="material-symbols-outlined text-secondary">stacked_line_chart</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <PhaseAccuracyTable label={whiteName} phaseData={phaseAccuracy.white} />
+            <PhaseAccuracyTable label={blackName} phaseData={phaseAccuracy.black} />
           </div>
         </div>
       )}
 
       {/* Tactic accuracy */}
       {tacticAccuracy && (
-        <div className="card">
-          <h2>Tactic Accuracy</h2>
-          <div className="tactic-accuracy-grid">
-            <TacticAccuracyBlock label={whiteName} tacticData={tacticAccuracy.white} color="white" />
-            <TacticAccuracyBlock label={blackName} tacticData={tacticAccuracy.black} color="black" />
+        <div className="bg-surface-container rounded-sm p-8 shadow-sm">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="font-headline text-lg text-primary">Tactic Accuracy</h3>
+            <span className="material-symbols-outlined text-secondary">bolt</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <TacticAccuracyBlock label={whiteName} tacticData={tacticAccuracy.white} />
+            <TacticAccuracyBlock label={blackName} tacticData={tacticAccuracy.black} />
           </div>
         </div>
       )}
 
       {/* Evaluation chart */}
       {chartData.length > 1 && (
-        <div className="card">
-          <h2>Evaluation</h2>
+        <div className="bg-surface-container rounded-sm p-8 shadow-sm">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="font-headline text-lg text-primary">Evaluation</h3>
+            <span className="material-symbols-outlined text-secondary">show_chart</span>
+          </div>
           <ResponsiveContainer width="100%" height={200}>
             <AreaChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
               <defs>
                 <linearGradient id="evalGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#769656" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#769656" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#163428" stopOpacity={0.15} />
+                  <stop offset="95%" stopColor="#163428" stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2a3a5c" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(22,52,40,0.08)" />
               <XAxis dataKey="name" tick={false} />
-              <YAxis domain={[-10, 10]} tick={{ fill: '#8a9bb5', fontSize: 11 }} />
-              <ReferenceLine y={0} stroke="#4a90d9" strokeDasharray="4 2" />
+              <YAxis domain={[-10, 10]} tick={{ fill: '#163428', opacity: 0.4, fontSize: 11 }} />
+              <ReferenceLine y={0} stroke="#77574d" strokeDasharray="4 2" />
               <Tooltip
-                contentStyle={{ background: '#16213e', border: '1px solid #2a3a5c', fontSize: '0.85rem' }}
+                contentStyle={{ background: '#f2ede4', border: '1px solid rgba(22,52,40,0.1)', borderRadius: '2px', fontSize: '0.85rem' }}
                 formatter={val => [`${val > 0 ? '+' : ''}${val.toFixed(2)}`, 'Eval']}
               />
-              <Area type="monotone" dataKey="eval" stroke="var(--primary)" fill="url(#evalGrad)" dot={false} strokeWidth={2} />
+              <Area type="monotone" dataKey="eval" stroke="#163428" fill="url(#evalGrad)" dot={false} strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
-          <p className="eval-legend">Positive = White advantage · Negative = Black advantage</p>
+          <p className="font-label text-xs uppercase tracking-widest text-primary/40 mt-3 text-center">
+            Positive = White advantage · Negative = Black advantage
+          </p>
         </div>
       )}
 
       {/* Move list */}
-      <div className="card">
-        <h2>Move Analysis</h2>
-        <div className="move-table-wrapper">
-          <table className="move-table">
+      <div className="bg-surface-container rounded-sm p-8 shadow-sm">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="font-headline text-lg text-primary">Move Analysis</h3>
+          <span className="material-symbols-outlined text-secondary">table_rows</span>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
             <thead>
-              <tr>
-                <th>#</th>
-                <th>White</th>
-                <th>Eval</th>
-                <th>CPL</th>
-                <th></th>
-                <th>Black</th>
-                <th>Eval</th>
-                <th>CPL</th>
-                <th></th>
+              <tr className="border-b border-primary/10">
+                {['#', 'White', 'Eval', 'CPL', '', 'Black', 'Eval', 'CPL', ''].map((h, i) => (
+                  <th key={i} className="font-label text-[10px] uppercase tracking-widest text-primary/40 px-2 py-2 text-left">{h}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {pairMoves(moves).map(pair => (
-                <tr key={pair.moveNumber}>
-                  <td className="move-number">{pair.moveNumber}.</td>
+                <tr key={pair.moveNumber} className="border-b border-primary/5 hover:bg-surface-container-high transition-colors">
+                  <td className="px-2 py-2 font-label text-xs text-primary/40">{pair.moveNumber}.</td>
                   <MoveCell move={pair.white} />
                   <MoveCell move={pair.black} />
                 </tr>
@@ -144,20 +159,24 @@ export default function StockfishAnalysis({ result, game, isAnalyzing }) {
   );
 }
 
-function AccuracyBlock({ label, accuracy, color, summary, side }) {
-  const accColor =
-    accuracy >= 90 ? '#27ae60' : accuracy >= 70 ? '#f39c12' : '#e74c3c';
+function accColor(accuracy) {
+  if (accuracy === null) return 'text-primary/40';
+  if (accuracy >= 90) return 'text-chess-success';
+  if (accuracy >= 70) return 'text-chess-warning';
+  return 'text-chess-danger';
+}
 
+function AccuracyBlock({ label, accuracy, summary, side }) {
   return (
-    <div className={`accuracy-block accuracy-${color}`}>
-      <div className="acc-label">{label}</div>
-      <div className="acc-value" style={{ color: accColor }}>
+    <div className="bg-surface-container-high rounded-sm p-6">
+      <div className="font-label text-xs uppercase tracking-widest text-primary/50 mb-1">{label}</div>
+      <div className={`font-headline text-3xl font-bold mb-4 ${accColor(accuracy)}`}>
         {accuracy !== null ? `${accuracy}%` : 'N/A'}
       </div>
-      <div className="acc-breakdown">
-        <span className="blunder">● {summary.blunders[side]} blunder{summary.blunders[side] !== 1 ? 's' : ''}</span>
-        <span className="mistake">● {summary.mistakes[side]} mistake{summary.mistakes[side] !== 1 ? 's' : ''}</span>
-        <span className="inaccuracy">● {summary.inaccuracies[side]} inaccurac{summary.inaccuracies[side] !== 1 ? 'ies' : 'y'}</span>
+      <div className="space-y-1 font-body text-sm">
+        <span className="block text-chess-danger">● {summary.blunders[side]} blunder{summary.blunders[side] !== 1 ? 's' : ''}</span>
+        <span className="block text-chess-warning">● {summary.mistakes[side]} mistake{summary.mistakes[side] !== 1 ? 's' : ''}</span>
+        <span className="block text-chess-inaccuracy">● {summary.inaccuracies[side]} inaccurac{summary.inaccuracies[side] !== 1 ? 'ies' : 'y'}</span>
       </div>
     </div>
   );
@@ -165,29 +184,23 @@ function AccuracyBlock({ label, accuracy, color, summary, side }) {
 
 const PHASE_LABELS = { opening: 'Opening', middlegame: 'Middlegame', endgame: 'Endgame' };
 
-function PhaseAccuracyTable({ label, phaseData, color }) {
+function PhaseAccuracyTable({ label, phaseData }) {
   return (
-    <div className={`phase-accuracy-block phase-${color}`}>
-      <div className="phase-player-label">{label}</div>
-      <table className="phase-table">
-        <tbody>
-          {Object.entries(PHASE_LABELS).map(([key, display]) => {
-            const val = phaseData?.[key];
-            const accColor = val === null ? '#8a9bb5'
-              : val >= 90 ? '#27ae60'
-              : val >= 70 ? '#f39c12'
-              : '#e74c3c';
-            return (
-              <tr key={key}>
-                <td className="phase-name">{display}</td>
-                <td className="phase-val" style={{ color: accColor }}>
-                  {val !== null ? `${val}%` : '—'}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+    <div className="bg-surface-container-high rounded-sm p-6">
+      <div className="font-label text-xs uppercase tracking-widest text-primary/50 mb-4">{label}</div>
+      <div className="space-y-2">
+        {Object.entries(PHASE_LABELS).map(([key, display]) => {
+          const val = phaseData?.[key];
+          return (
+            <div key={key} className="flex justify-between items-center">
+              <span className="font-body text-sm text-primary/70">{display}</span>
+              <span className={`font-headline text-base ${accColor(val)}`}>
+                {val !== null ? `${val}%` : '—'}
+              </span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -201,48 +214,42 @@ const TACTIC_LABELS = {
   promotion: '♛ Promotion',
 };
 
-function TacticAccuracyBlock({ label, tacticData, color }) {
+function TacticAccuracyBlock({ label, tacticData }) {
   const total = (tacticData?.found ?? 0) + (tacticData?.missed ?? 0);
   const foundPct = total > 0 ? Math.round((tacticData.found / total) * 100) : null;
-  const pctColor = foundPct === null ? '#8a9bb5'
-    : foundPct >= 75 ? '#27ae60'
-    : foundPct >= 50 ? '#f39c12'
-    : '#e74c3c';
-
   const byType = tacticData?.byType ?? {};
   const types = Object.keys(byType).sort();
 
   return (
-    <div className={`tactic-block tactic-${color}`}>
-      <div className="tactic-player-label">{label}</div>
-      <div className="tactic-summary">
-        <span className="tactic-found">✔ {tacticData?.found ?? 0} found</span>
-        <span className="tactic-missed">✘ {tacticData?.missed ?? 0} missed</span>
+    <div className="bg-surface-container-high rounded-sm p-6">
+      <div className="font-label text-xs uppercase tracking-widest text-primary/50 mb-3">{label}</div>
+      <div className="flex items-center gap-4 mb-4">
+        <span className="font-body text-sm text-chess-success">✔ {tacticData?.found ?? 0} found</span>
+        <span className="font-body text-sm text-chess-danger">✘ {tacticData?.missed ?? 0} missed</span>
         {foundPct !== null && (
-          <span className="tactic-pct" style={{ color: pctColor }}>{foundPct}%</span>
+          <span className={`font-headline text-lg ${accColor(foundPct)}`}>{foundPct}%</span>
         )}
       </div>
-      {types.length > 0 && (
-        <table className="tactic-type-table">
-          <tbody>
-            {types.map(type => {
-              const { found, missed } = byType[type];
-              const total = found + missed;
-              const pct = total > 0 ? Math.round((found / total) * 100) : 0;
-              return (
-                <tr key={type}>
-                  <td className="tactic-type-name">{TACTIC_LABELS[type] ?? type}</td>
-                  <td className="tactic-type-found">✔{found}</td>
-                  <td className="tactic-type-missed">✘{missed}</td>
-                  <td className="tactic-type-pct">{pct}%</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      )}
-      {types.length === 0 && (
-        <p className="tactic-none">No tactical moments detected.</p>
+      {types.length > 0 ? (
+        <div className="space-y-1.5">
+          {types.map(type => {
+            const { found, missed } = byType[type];
+            const t = found + missed;
+            const pct = t > 0 ? Math.round((found / t) * 100) : 0;
+            return (
+              <div key={type} className="flex items-center justify-between text-xs font-body">
+                <span className="text-primary/70">{TACTIC_LABELS[type] ?? type}</span>
+                <span className="flex gap-3 text-primary/50">
+                  <span className="text-chess-success">✔{found}</span>
+                  <span className="text-chess-danger">✘{missed}</span>
+                  <span className="font-label">{pct}%</span>
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <p className="font-label text-xs uppercase tracking-widest text-primary/30">No tactical moments detected.</p>
       )}
     </div>
   );
@@ -254,22 +261,32 @@ function MoveCell({ move }) {
     ? (move.evalAfter > 0 ? '+' : '') + (move.evalAfter / 100).toFixed(2)
     : '—';
 
+  const classCss = {
+    blunder: 'text-chess-danger font-semibold',
+    mistake: 'text-chess-warning',
+    inaccuracy: 'text-chess-inaccuracy',
+    good: 'text-primary',
+    book: 'text-primary/50',
+  }[move.classification] ?? 'text-primary';
+
   return (
     <>
-      <td className={`move-san ${move.classification}`}>
+      <td className={`px-2 py-2 font-body ${classCss}`}>
         {move.san}
         {move.tactic && (
-          <span className={`tactic-icon tactic-icon-${move.tactic.found ? 'found' : 'missed'}`}
-            title={`${move.tactic.found ? 'Tactic found' : 'Tactic missed'}: ${move.tactic.type}`}>
+          <span
+            className={`ml-1 text-xs ${move.tactic.found ? 'text-chess-success' : 'text-primary/30'}`}
+            title={`${move.tactic.found ? 'Tactic found' : 'Tactic missed'}: ${move.tactic.type}`}
+          >
             {move.tactic.found ? '★' : '☆'}
           </span>
         )}
       </td>
-      <td className="move-eval">{evalStr}</td>
-      <td className="move-cpl">{move.cploss > 0 ? `-${move.cploss}` : '0'}</td>
-      <td>
+      <td className="px-2 py-2 font-body text-xs text-primary/50">{evalStr}</td>
+      <td className="px-2 py-2 font-body text-xs text-primary/40">{move.cploss > 0 ? `-${move.cploss}` : '0'}</td>
+      <td className="px-2 py-2 font-label text-xs">
         {move.classification !== 'good' && move.classification !== 'book' && (
-          <span className={`class-icon ${move.classification}`}>
+          <span className={classCss}>
             {move.classification === 'blunder' ? '??' : move.classification === 'mistake' ? '?' : '?!'}
           </span>
         )}
@@ -292,6 +309,6 @@ function pairMoves(moves) {
 
 function clampEval(cp) {
   if (cp === null) return null;
-  // Convert centipawns to pawns, clamp to [-10, 10]
   return Math.max(-10, Math.min(10, cp / 100));
 }
+

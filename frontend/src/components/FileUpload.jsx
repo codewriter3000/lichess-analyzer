@@ -1,12 +1,19 @@
-import { useState, useRef } from 'react';
-import './FileUpload.css';
+import { useState, useRef, useEffect } from 'react';
 
-export default function FileUpload({ onUpload }) {
+export default function FileUpload({ onUpload, uploadId }) {
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [fileName, setFileName] = useState('');
   const inputRef = useRef(null);
+
+  useEffect(() => {
+    function handleFabFile(e) {
+      handleFile(e.detail);
+    }
+    window.addEventListener('pgn-file-selected', handleFabFile);
+    return () => window.removeEventListener('pgn-file-selected', handleFabFile);
+  }, []);
 
   async function handleFile(file) {
     if (!file) return;
@@ -54,7 +61,11 @@ export default function FileUpload({ onUpload }) {
 
   return (
     <div
-      className={`upload-area ${isDragging ? 'dragging' : ''}`}
+      className={`border-2 border-dashed rounded-sm p-10 text-center cursor-pointer transition-all duration-200 ${
+        isDragging
+          ? 'border-primary bg-primary/5'
+          : 'border-primary/20 bg-surface-container hover:border-primary/40 hover:bg-primary/5'
+      }`}
       onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
       onDragLeave={() => setIsDragging(false)}
       onDrop={handleDrop}
@@ -66,30 +77,36 @@ export default function FileUpload({ onUpload }) {
     >
       <input
         ref={inputRef}
+        id={uploadId}
         type="file"
         accept=".pgn"
         onChange={handleChange}
-        style={{ display: 'none' }}
+        className="hidden"
         aria-hidden="true"
       />
 
       {isLoading ? (
-        <div className="upload-inner">
+        <div className="flex flex-col items-center gap-3">
           <span className="spinner" />
-          <p>Parsing PGN file...</p>
+          <p className="font-body text-primary/70">Parsing PGN file...</p>
         </div>
       ) : (
-        <div className="upload-inner">
-          <div className="upload-icon">📂</div>
-          <p className="upload-text">
+        <div className="flex flex-col items-center gap-3">
+          <span className="material-symbols-outlined text-5xl text-primary/30">description</span>
+          <p className="font-headline text-lg text-primary">
             {fileName
               ? `✓ ${fileName} loaded`
               : 'Drop your PGN file here or click to browse'}
           </p>
-          <p className="upload-hint">Supports Lichess & Chess.com PGN exports</p>
-          {error && <p className="upload-error">{error}</p>}
+          <p className="font-label text-xs uppercase tracking-widest text-primary/50">
+            Supports Lichess &amp; Chess.com PGN exports
+          </p>
+          {error && (
+            <p className="font-body text-sm text-error mt-1">{error}</p>
+          )}
         </div>
       )}
     </div>
   );
 }
+
