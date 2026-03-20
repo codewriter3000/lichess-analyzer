@@ -1,0 +1,10 @@
+.upload-dropzone {
+  @apply border-2 border-dashed rounded-sm p-10 text-center cursor-pointer
+         transition-all duration-200 border-primary/20 bg-surface-container;
+}
+.upload-dropzone:hover { @apply border-primary/40 bg-primary/5; }
+.upload-dropzone.dragging { @apply border-primary bg-primary/5; }
+
+.upload-inner {
+  @apply flex flex-col items-center gap-3;
+}

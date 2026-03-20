@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import './FileUpload.css';
 
 export default function FileUpload({ onUpload, uploadId }) {
   const [isDragging, setIsDragging] = useState(false);
@@ -8,9 +9,7 @@ export default function FileUpload({ onUpload, uploadId }) {
   const inputRef = useRef(null);
 
   useEffect(() => {
-    function handleFabFile(e) {
-      handleFile(e.detail);
-    }
+    function handleFabFile(e) { handleFile(e.detail); }
     window.addEventListener('pgn-file-selected', handleFabFile);
     return () => window.removeEventListener('pgn-file-selected', handleFabFile);
   }, []);
@@ -21,25 +20,15 @@ export default function FileUpload({ onUpload, uploadId }) {
       setError('Please select a .pgn file');
       return;
     }
-
     setError('');
     setIsLoading(true);
     setFileName(file.name);
-
     try {
       const formData = new FormData();
       formData.append('pgn', file);
-
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Upload failed');
-      }
-
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
       onUpload(data.games, data.username || '');
     } catch (err) {
       setError(err.message);
@@ -51,21 +40,12 @@ export default function FileUpload({ onUpload, uploadId }) {
   function handleDrop(e) {
     e.preventDefault();
     setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    handleFile(file);
-  }
-
-  function handleChange(e) {
-    handleFile(e.target.files[0]);
+    handleFile(e.dataTransfer.files[0]);
   }
 
   return (
     <div
-      className={`border-2 border-dashed rounded-sm p-10 text-center cursor-pointer transition-all duration-200 ${
-        isDragging
-          ? 'border-primary bg-primary/5'
-          : 'border-primary/20 bg-surface-container hover:border-primary/40 hover:bg-primary/5'
-      }`}
+      className={`upload-dropzone${isDragging ? ' dragging' : ''}`}
       onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
       onDragLeave={() => setIsDragging(false)}
       onDrop={handleDrop}
@@ -80,33 +60,28 @@ export default function FileUpload({ onUpload, uploadId }) {
         id={uploadId}
         type="file"
         accept=".pgn"
-        onChange={handleChange}
+        onChange={e => handleFile(e.target.files[0])}
         className="hidden"
         aria-hidden="true"
       />
 
       {isLoading ? (
-        <div className="flex flex-col items-center gap-3">
+        <div className="upload-inner">
           <span className="spinner" />
           <p className="font-body text-primary/70">Parsing PGN file...</p>
         </div>
       ) : (
-        <div className="flex flex-col items-center gap-3">
+        <div className="upload-inner">
           <span className="material-symbols-outlined text-5xl text-primary/30">description</span>
           <p className="font-headline text-lg text-primary">
-            {fileName
-              ? `✓ ${fileName} loaded`
-              : 'Drop your PGN file here or click to browse'}
+            {fileName ? `✓ ${fileName} loaded` : 'Drop your PGN file here or click to browse'}
           </p>
           <p className="font-label text-xs uppercase tracking-widest text-primary/50">
             Supports Lichess &amp; Chess.com PGN exports
           </p>
-          {error && (
-            <p className="font-body text-sm text-error mt-1">{error}</p>
-          )}
+          {error && <p className="font-body text-sm text-error mt-1">{error}</p>}
         </div>
       )}
     </div>
   );
 }
-

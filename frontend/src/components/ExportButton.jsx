@@ -1,3 +1,5 @@
+import './ExportButton.css';
+
 export default function ExportButton({ username, disabled }) {
   function handleExport() {
     const url = username
@@ -14,7 +16,7 @@ export default function ExportButton({ username, disabled }) {
 
   return (
     <button
-      className="w-full flex items-center gap-2 bg-primary/10 text-primary py-2.5 px-4 rounded-sm font-label text-xs uppercase tracking-widest hover:bg-primary/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+      id="export-btn"
       onClick={handleExport}
       disabled={disabled}
       title="Export games as CSV"
@@ -24,4 +26,3 @@ export default function ExportButton({ username, disabled }) {
     </button>
   );
 }
-

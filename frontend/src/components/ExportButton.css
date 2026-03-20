@@ -1,0 +1,7 @@
+#export-btn {
+  @apply w-full flex items-center gap-2 bg-primary/10 text-primary
+         py-2.5 px-4 rounded-sm font-label text-xs uppercase tracking-widest
+         transition-colors;
+}
+#export-btn:hover    { @apply bg-primary/20; }
+#export-btn:disabled { @apply opacity-40 cursor-not-allowed; }

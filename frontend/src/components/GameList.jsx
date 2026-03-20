@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import './GameList.css';
 
 export default function GameList({ games, selectedGame, onSelectGame, onAnalyze, isAnalyzing }) {
   const [depth, setDepth] = useState(15);
@@ -15,15 +16,15 @@ export default function GameList({ games, selectedGame, onSelectGame, onAnalyze,
   });
 
   function resultIcon(result) {
-    if (result === '1-0') return { icon: 'emoji_events', cls: 'text-primary' };
-    if (result === '0-1') return { icon: 'emoji_events', cls: 'text-secondary' };
-    if (result === '1/2-1/2') return { icon: 'handshake', cls: 'text-primary/30' };
-    return { icon: 'help_outline', cls: 'text-primary/30' };
+    if (result === '1-0')     return { icon: 'emoji_events', cls: 'result-icon-win'  };
+    if (result === '0-1')     return { icon: 'emoji_events', cls: 'result-icon-loss' };
+    if (result === '1/2-1/2') return { icon: 'handshake',   cls: 'result-icon-draw' };
+    return                           { icon: 'help_outline', cls: 'result-icon-draw' };
   }
 
   function resultLabel(result) {
-    if (result === '1-0') return '1 – 0';
-    if (result === '0-1') return '0 – 1';
+    if (result === '1-0')     return '1 – 0';
+    if (result === '0-1')     return '0 – 1';
     if (result === '1/2-1/2') return '½ – ½';
     return result;
   }
@@ -31,14 +32,14 @@ export default function GameList({ games, selectedGame, onSelectGame, onAnalyze,
   return (
     <div className="space-y-6">
       {/* Toolbar */}
-      <div className="bg-surface-container rounded-sm p-6 shadow-sm flex flex-wrap gap-4 items-center">
+      <div id="game-list-toolbar">
         <div className="flex-1 min-w-48">
           <input
             type="text"
             placeholder="Search by player or opening…"
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full bg-background border border-primary/20 rounded-sm text-on-background px-4 py-2.5 font-body text-sm focus:outline-none focus:border-primary/50 transition-colors placeholder:text-primary/30"
+            className="game-list-search"
           />
         </div>
         <div className="flex items-center gap-3">
@@ -49,7 +50,7 @@ export default function GameList({ games, selectedGame, onSelectGame, onAnalyze,
             max="25"
             value={depth}
             onChange={e => setDepth(Number(e.target.value))}
-            className="w-16 bg-background border border-primary/20 rounded-sm text-on-background px-2 py-2 text-sm text-center font-body focus:outline-none focus:border-primary/50 transition-colors"
+            className="game-list-depth"
           />
         </div>
         <span className="font-label text-xs uppercase tracking-widest text-primary/40">
@@ -58,9 +59,9 @@ export default function GameList({ games, selectedGame, onSelectGame, onAnalyze,
       </div>
 
       {/* Games feed */}
-      <div className="bg-surface-container rounded-sm shadow-sm overflow-hidden">
-        <div className="flex justify-between items-center p-6 pb-4 border-b border-primary/5">
-          <h3 className="font-headline text-lg text-primary">Recent Manuscripts</h3>
+      <div className="game-feed">
+        <div id="game-feed-header">
+          <h3 className="card-title">Recent Manuscripts</h3>
           <span className="material-symbols-outlined text-secondary">history_edu</span>
         </div>
         <div className="divide-y divide-primary/5">
@@ -69,12 +70,10 @@ export default function GameList({ games, selectedGame, onSelectGame, onAnalyze,
             return (
               <div
                 key={game.index}
-                className={`flex items-center gap-4 py-4 px-6 cursor-pointer transition-colors ${
-                  selectedGame === game.index ? 'bg-surface-container-high' : 'hover:bg-surface-container-high'
-                }`}
+                className={`game-row${selectedGame === game.index ? ' selected' : ''}`}
                 onClick={() => onSelectGame(game.index)}
               >
-                <div className="w-10 h-10 bg-primary/5 flex items-center justify-center rounded-sm flex-shrink-0">
+                <div className="game-row-icon">
                   <span className={`material-symbols-outlined ${cls}`}>{icon}</span>
                 </div>
                 <div className="flex-1 min-w-0">
@@ -97,7 +96,7 @@ export default function GameList({ games, selectedGame, onSelectGame, onAnalyze,
                   </p>
                 </div>
                 <button
-                  className="bg-secondary text-on-secondary px-4 py-2 rounded-sm font-label text-[10px] uppercase tracking-widest hover:opacity-90 transition-all flex items-center gap-1.5 flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="analyze-btn"
                   onClick={e => {
                     e.stopPropagation();
                     onSelectGame(game.index);
@@ -128,4 +127,3 @@ export default function GameList({ games, selectedGame, onSelectGame, onAnalyze,
     </div>
   );
 }
-

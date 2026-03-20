@@ -21,15 +21,46 @@
   }
 }
 
-@layer utilities {
-  .bg-parchment-texture {
-    background-color: #fef9f0;
+@layer components {
+  /* Shared surface card (bg + shape + shadow) */
+  .content-card {
+    @apply bg-surface-container rounded-sm shadow-sm;
+  }
+
+  /* Shared card section header: title left, icon right */
+  .card-section-header {
+    @apply flex justify-between items-center mb-6;
+  }
+
+  /* Shared inner sub-card panel */
+  .inner-card {
+    @apply bg-surface-container-high rounded-sm p-6;
+  }
+
+  /* Shared card h3 title */
+  .card-title {
+    @apply font-headline text-lg text-primary;
+  }
+
+  /* Shared base text input (no padding — extend per context) */
+  .text-input {
+    @apply bg-background border border-primary/20 rounded-sm text-on-background font-body text-sm transition-colors;
+  }
+  .text-input:focus {
+    @apply outline-none border-primary/50;
+  }
+
+  /* Parchment dot-pattern texture overlay */
+  .parchment-overlay {
+    @apply absolute inset-0 pointer-events-none;
     background-image: radial-gradient(#163428 0.5px, transparent 0.5px);
     background-size: 24px 24px;
     background-attachment: fixed;
     opacity: 0.03;
   }
+}
 
+@layer utilities {
   /* Chess analysis classification colors */
   .blunder { color: #e74c3c; }
   .mistake { color: #f39c12; }

@@ -1,0 +1,29 @@
+.analysis-state-card {
+  @apply content-card p-12 flex flex-col items-center gap-4;
+}
+
+.analysis-section {
+  @apply content-card p-8;
+}
+
+/* ── Accuracy colour helpers ───────────────────────────── */
+.acc-muted { @apply text-primary/40; }
+.acc-good  { @apply text-chess-success; }
+.acc-warn  { @apply text-chess-warning; }
+.acc-bad   { @apply text-chess-danger; }
+
+/* ── Move classification colours ──────────────────────── */
+.move-blunder   { @apply text-chess-danger font-semibold; }
+.move-mistake   { @apply text-chess-warning; }
+.move-inaccuracy { @apply text-chess-inaccuracy; }
+.move-good      { @apply text-primary; }
+.move-book      { @apply text-primary/50; }
+
+/* ── Move table ────────────────────────────────────────── */
+.move-table-th {
+  @apply font-label text-[10px] uppercase tracking-widest text-primary/40 px-2 py-2 text-left;
+}
+
+.eval-legend {
+  @apply font-label text-xs uppercase tracking-widest text-primary/40 mt-3 text-center;
+}

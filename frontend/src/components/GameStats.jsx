@@ -3,6 +3,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, BarChart, Bar,
 } from 'recharts';
+import './GameStats.css';
 
 const RESULT_COLORS = {
   Wins: '#163428',
@@ -35,21 +36,19 @@ export default function GameStats({ username, gameCount }) {
   }, [username, gameCount]);
 
   if (loading) return (
-    <div className="flex items-center gap-3 py-12 text-primary/60 font-label text-sm uppercase tracking-widest">
+    <div className="stats-loading">
       <span className="spinner" /> Loading stats…
     </div>
   );
   if (error) return (
-    <div className="bg-error-container text-on-error-container rounded-sm p-4 font-body text-sm">
-      ⚠ {error}
-    </div>
+    <div className="stats-error">⚠ {error}</div>
   );
   if (!stats) return null;
 
   const pieData = [
-    { name: 'Wins', value: stats.wins },
+    { name: 'Wins',   value: stats.wins   },
     { name: 'Losses', value: stats.losses },
-    { name: 'Draws', value: stats.draws },
+    { name: 'Draws',  value: stats.draws  },
   ].filter(d => d.value > 0);
 
   return (
@@ -57,36 +56,34 @@ export default function GameStats({ username, gameCount }) {
       {/* Overview grid */}
       <div className="grid grid-cols-12 gap-6">
         {/* Summary stats */}
-        <div className="col-span-12 lg:col-span-8 bg-surface-container rounded-sm p-8 shadow-sm">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="font-headline text-lg text-primary">
-              Overview {username && `— ${username}`}
-            </h3>
+        <div id="stats-overview">
+          <div className="card-section-header">
+            <h3 className="card-title">Overview {username && `— ${username}`}</h3>
             <span className="material-symbols-outlined text-secondary">query_stats</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <StatCard label="Total Games" value={stats.total} />
-            <StatCard label={`Wins (${stats.winRate}%)`} value={stats.wins} valueClass="text-chess-success" />
-            <StatCard label={`Losses (${stats.lossRate}%)`} value={stats.losses} valueClass="text-chess-danger" />
-            <StatCard label={`Draws (${stats.drawRate}%)`} value={stats.draws} valueClass="text-primary/60" />
-            <StatCard label="Avg. Plies" value={stats.avgGameLength} />
+            <StatCard label="Total Games"                value={stats.total}         />
+            <StatCard label={`Wins (${stats.winRate}%)`}   value={stats.wins}          colorClass="stat-value-win"  />
+            <StatCard label={`Losses (${stats.lossRate}%)`} value={stats.losses}       colorClass="stat-value-loss" />
+            <StatCard label={`Draws (${stats.drawRate}%)`}  value={stats.draws}        colorClass="stat-value-draw" />
+            <StatCard label="Avg. Plies"                value={stats.avgGameLength} />
             {stats.currentStreak > 0 && (
               <StatCard
                 label={`Current ${stats.currentStreakType} streak`}
                 value={stats.currentStreak}
-                valueClass={stats.currentStreakType === 'win' ? 'text-chess-success' : 'text-chess-danger'}
+                colorClass={stats.currentStreakType === 'win' ? 'stat-value-win' : 'stat-value-loss'}
               />
             )}
             {stats.bestWinStreak > 0 && (
-              <StatCard label="Best Win Streak" value={stats.bestWinStreak} valueClass="text-chess-success" />
+              <StatCard label="Best Win Streak" value={stats.bestWinStreak} colorClass="stat-value-win" />
             )}
           </div>
         </div>
 
         {/* Performance pie chart */}
         {pieData.length > 0 && (
-          <div className="col-span-12 lg:col-span-4 bg-surface-container p-8 rounded-sm shadow-sm flex flex-col items-center justify-center">
-            <h3 className="font-headline text-lg text-primary mb-6 self-start">Performance Matrix</h3>
+          <div id="stats-perf-matrix">
+            <h3 className="card-title mb-6 self-start">Performance Matrix</h3>
             <div className="w-full">
               <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
@@ -112,9 +109,9 @@ export default function GameStats({ username, gameCount }) {
 
       {/* Color performance */}
       {(stats.whiteGames > 0 || stats.blackGames > 0) && (
-        <div className="bg-surface-container rounded-sm p-8 shadow-sm">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="font-headline text-lg text-primary">Performance by Color</h3>
+        <div className="stats-section">
+          <div className="card-section-header">
+            <h3 className="card-title">Performance by Color</h3>
             <span className="material-symbols-outlined text-secondary">contrast</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -138,9 +135,9 @@ export default function GameStats({ username, gameCount }) {
 
       {/* Rating history */}
       {stats.ratingHistory && stats.ratingHistory.length > 1 && (
-        <div className="bg-surface-container rounded-sm p-8 shadow-sm">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="font-headline text-lg text-primary">Rating History</h3>
+        <div className="stats-section">
+          <div className="card-section-header">
+            <h3 className="card-title">Rating History</h3>
             <span className="material-symbols-outlined text-secondary">trending_up</span>
           </div>
           <ResponsiveContainer width="100%" height={250}>
@@ -152,7 +149,7 @@ export default function GameStats({ username, gameCount }) {
                 contentStyle={{ background: '#f2ede4', border: '1px solid rgba(22,52,40,0.1)', borderRadius: '2px' }}
                 formatter={(val, name) => [val, name === 'rating' ? 'Your rating' : 'Opp. rating']}
               />
-              <Line type="monotone" dataKey="rating" stroke="#163428" dot={false} strokeWidth={2} />
+              <Line type="monotone" dataKey="rating"         stroke="#163428" dot={false} strokeWidth={2} />
               <Line type="monotone" dataKey="opponentRating" stroke="#77574d" dot={false} strokeWidth={1} strokeDasharray="4 2" />
             </LineChart>
           </ResponsiveContainer>
@@ -161,9 +158,9 @@ export default function GameStats({ username, gameCount }) {
 
       {/* Top openings — Repertoire Usage */}
       {stats.topOpenings && stats.topOpenings.length > 0 && (
-        <div className="bg-surface-container rounded-sm p-8 shadow-sm">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="font-headline text-lg text-primary">Repertoire Usage</h3>
+        <div className="stats-section">
+          <div className="card-section-header">
+            <h3 className="card-title">Repertoire Usage</h3>
             <span className="material-symbols-outlined text-secondary">menu_book</span>
           </div>
           <div className="space-y-5">
@@ -180,8 +177,8 @@ export default function GameStats({ username, gameCount }) {
                     </span>
                     <span className="font-label text-xs text-primary/60">{op.total} Games · {winPct}% wins</span>
                   </div>
-                  <div className="h-1.5 w-full bg-surface-variant rounded-full overflow-hidden">
-                    <div className="h-full bg-primary transition-all duration-500" style={{ width: `${pct}%` }} />
+                  <div className="opening-bar-track">
+                    <div className="opening-bar-fill" style={{ width: `${pct}%` }} />
                   </div>
                 </div>
               );
@@ -193,20 +190,23 @@ export default function GameStats({ username, gameCount }) {
   );
 }
 
-function StatCard({ label, value, valueClass = 'text-primary' }) {
+function StatCard({ label, value, colorClass = 'stat-value-default' }) {
   return (
-    <div className="bg-surface-container-high rounded-sm p-4 text-center">
-      <div className={`font-headline text-2xl font-bold ${valueClass}`}>{value}</div>
-      <div className="font-label text-[10px] uppercase tracking-widest text-primary/50 mt-1">{label}</div>
+    <div className="stat-card">
+      <div className={`stat-value ${colorClass}`}>{value}</div>
+      <div className="stat-inner-label">{label}</div>
     </div>
   );
 }
 
 function ColorPerfCard({ color, games, winRate }) {
   return (
-    <div className="flex items-center gap-4 p-4 bg-surface-container-high rounded-sm">
-      <div className={`w-8 h-8 rounded-sm flex items-center justify-center ${color === 'White' ? 'bg-surface-container-lowest border border-primary/20' : 'bg-primary'}`}>
-        <span className={`material-symbols-outlined text-sm ${color === 'White' ? 'text-primary' : 'text-on-primary'}`} style={{ fontVariationSettings: "'FILL' 1" }}>
+    <div className="color-perf-item">
+      <div className={`color-icon-box color-icon-box--${color.toLowerCase()}`}>
+        <span
+          className={`material-symbols-outlined text-sm ${color === 'White' ? 'text-primary' : 'text-on-primary'}`}
+          style={{ fontVariationSettings: "'FILL' 1" }}
+        >
           radio_button_checked
         </span>
       </div>

@@ -1,0 +1,40 @@
+#game-list-toolbar {
+  @apply content-card p-6 flex flex-wrap gap-4 items-center;
+}
+
+.game-list-search {
+  @apply text-input w-full px-4 py-2.5 placeholder:text-primary/30;
+}
+
+.game-list-depth {
+  @apply text-input w-16 px-2 py-2 text-center;
+}
+
+.game-feed {
+  @apply content-card overflow-hidden;
+}
+
+#game-feed-header {
+  @apply flex justify-between items-center p-6 pb-4 border-b border-primary/5;
+}
+
+.game-row {
+  @apply flex items-center gap-4 py-4 px-6 cursor-pointer transition-colors;
+}
+.game-row:hover,
+.game-row.selected { @apply bg-surface-container-high; }
+
+.game-row-icon {
+  @apply w-10 h-10 bg-primary/5 flex items-center justify-center rounded-sm flex-shrink-0;
+}
+
+.result-icon-win  { @apply text-primary; }
+.result-icon-loss { @apply text-secondary; }
+.result-icon-draw { @apply text-primary/30; }
+
+.analyze-btn {
+  @apply bg-secondary text-on-secondary px-4 py-2 rounded-sm font-label text-[10px]
+         uppercase tracking-widest transition-all flex items-center gap-1.5 flex-shrink-0;
+}
+.analyze-btn:hover   { @apply opacity-90; }
+.analyze-btn:disabled { @apply opacity-40 cursor-not-allowed; }

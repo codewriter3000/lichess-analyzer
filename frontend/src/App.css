@@ -1,6 +1,5 @@
-/* App-level overrides — most styling handled via Tailwind utilities in JSX */
+/* ─── Loading Spinner ──────────────────────────────────────── */
 
-/* Loading spinner used across components */
 .spinner {
   display: inline-block;
   width: 16px;
@@ -13,7 +12,113 @@
   vertical-align: middle;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── App Root ─────────────────────────────────────────────── */
+
+.app-root {
+  @apply min-h-screen bg-background font-body text-on-background;
 }
+
+/* ─── Top App Bar ──────────────────────────────────────────── */
+
+#app-topbar {
+  @apply fixed top-0 left-0 w-full z-50 flex justify-between items-center
+         px-8 h-20 bg-gradient-to-b from-surface-container to-background
+         border-b border-primary/10 shadow-sm;
+}
+
+.topnav-btn {
+  @apply text-primary/70 font-medium font-label text-sm uppercase tracking-wide
+         bg-transparent border-none cursor-pointer transition-colors duration-300;
+}
+.topnav-btn:hover { @apply text-secondary; }
+
+.topbar-icon-btn {
+  @apply text-primary transition-colors cursor-pointer;
+}
+.topbar-icon-btn:hover { @apply text-secondary; }
+
+#topbar-avatar {
+  @apply h-10 w-10 rounded-full border border-primary/20 bg-primary
+         flex items-center justify-center overflow-hidden;
+}
+
+/* ─── Sidebar ──────────────────────────────────────────────── */
+
+#app-sidebar {
+  @apply fixed left-0 top-0 h-full pt-20 flex flex-col z-40
+         bg-surface-container border-r border-primary/10 w-72;
+  box-shadow: 4px 0 24px rgba(29, 28, 22, 0.04);
+}
+
+#sidebar-icon-box {
+  @apply w-10 h-10 bg-primary flex items-center justify-center rounded-sm;
+}
+
+#new-analysis-btn {
+  @apply w-full bg-primary text-on-primary py-3 px-4 rounded-sm font-label
+         text-sm uppercase tracking-widest transition-opacity mb-6
+         text-center cursor-pointer block;
+}
+#new-analysis-btn:hover { @apply opacity-90; }
+
+.sidenav-btn {
+  @apply w-full flex items-center gap-3 px-4 py-3 transition-all duration-200
+         font-label text-sm uppercase tracking-wide text-left;
+}
+.sidenav-btn.active {
+  @apply bg-surface-container-highest text-primary font-bold border-r-4 border-secondary;
+}
+.sidenav-btn:not(.active) { @apply text-primary/60; }
+.sidenav-btn:not(.active):hover { @apply bg-surface-container-highest/50 pl-6; }
+
+.sidebar-field-label {
+  @apply font-label text-xs uppercase tracking-widest text-primary/50 block mb-1;
+}
+
+.sidebar-username-input {
+  @apply text-input w-full px-3 py-2;
+}
+
+#engine-settings-btn {
+  @apply flex items-center gap-3 px-4 py-3 text-primary/60 w-full transition-all duration-200;
+}
+#engine-settings-btn:hover { @apply bg-surface-container-highest/50; }
+
+/* ─── Main Content Canvas ──────────────────────────────────── */
+
+#app-main {
+  @apply ml-72 pt-24 px-8 pb-12 min-h-screen relative overflow-hidden;
+}
+
+#page-header-row {
+  @apply flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10;
+}
+
+.page-section-label {
+  @apply font-label text-sm uppercase text-secondary mb-2 block;
+  letter-spacing: 0.2em;
+}
+
+#total-games-card {
+  @apply content-card p-4 px-8 text-center border-b-2 border-primary/10;
+}
+
+.total-games-label {
+  @apply font-label text-xs uppercase text-primary/50 tracking-widest block mb-1;
+}
+
+#upload-section-card {
+  @apply content-card p-8;
+}
+
+/* ─── FAB ──────────────────────────────────────────────────── */
+
+#app-fab {
+  @apply fixed bottom-8 right-8 w-16 h-16 bg-primary text-on-primary shadow-xl
+         flex items-center justify-center rounded-full transition-transform z-50 cursor-pointer;
+}
+#app-fab:hover { @apply scale-105; }
+
 
