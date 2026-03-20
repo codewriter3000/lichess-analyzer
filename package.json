@@ -1,0 +1,16 @@
+{
+  "name": "lichess-analyzer",
+  "version": "1.0.0",
+  "description": "Local app to analyze Lichess/Chess.com PGN files with stats and Stockfish analysis",
+  "scripts": {
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "cd frontend && npm run dev",
+    "dev": "npx concurrently \"npm run start:backend\" \"npm run start:frontend\"",
+    "build": "cd frontend && npm run build",
+    "test": "cd backend && npm test",
+    "install:all": "cd backend && npm install && cd ../frontend && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
