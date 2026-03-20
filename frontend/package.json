@@ -12,8 +12,10 @@
     "@fontsource/inter": "^5.2.8",
     "@fontsource/noto-serif": "^5.2.9",
     "@fontsource/work-sans": "^5.2.8",
+    "chess.js": "^1.4.0",
     "material-symbols": "^0.42.3",
     "react": "^18.2.0",
+    "react-chessboard": "^4.7.2",
     "react-dom": "^18.2.0",
     "recharts": "^2.12.0"
   },
