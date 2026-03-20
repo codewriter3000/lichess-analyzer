@@ -1,0 +1,152 @@
+.game-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.list-toolbar {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: #fff;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  flex: 1;
+  min-width: 200px;
+  outline: none;
+}
+
+.search-input:focus {
+  border-color: var(--primary);
+}
+
+.depth-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.depth-input {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: #fff;
+  padding: 0.4rem 0.5rem;
+  width: 60px;
+  text-align: center;
+  outline: none;
+}
+
+.list-count {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.game-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.game-row {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  transition: border-color 0.2s;
+}
+
+.game-row:hover {
+  border-color: var(--primary);
+}
+
+.game-row.selected {
+  border-color: var(--primary);
+  background: rgba(118, 150, 86, 0.08);
+}
+
+.game-players {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.95rem;
+  flex: 1;
+  min-width: 200px;
+}
+
+.player-name {
+  font-weight: 600;
+  color: #fff;
+}
+
+.elo {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.vs {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin: 0 0.2rem;
+}
+
+.game-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+}
+
+.game-date {
+  color: var(--text-muted);
+}
+
+.game-opening {
+  color: var(--secondary);
+  font-size: 0.8rem;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ply-count {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.analyze-btn {
+  margin-left: auto;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-win { background: rgba(39, 174, 96, 0.2); color: var(--success); }
+.badge-loss { background: rgba(231, 76, 60, 0.2); color: var(--danger); }
+.badge-draw { background: rgba(127, 140, 141, 0.2); color: var(--draw); }
+.badge-unknown { background: rgba(74, 144, 217, 0.2); color: var(--secondary); }

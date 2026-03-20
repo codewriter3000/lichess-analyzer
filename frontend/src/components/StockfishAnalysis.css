@@ -1,0 +1,135 @@
+.analysis {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.analysis-loading,
+.analysis-empty {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: var(--text-muted);
+}
+
+.analysis-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.analysis-header h2 {
+  font-size: 1.1rem;
+}
+
+.game-info {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+/* Accuracy section */
+.accuracy-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.accuracy-block {
+  background: var(--bg-card2);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.accuracy-white { border-top: 3px solid #ccc; }
+.accuracy-black { border-top: 3px solid #555; }
+
+.acc-label {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.acc-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.acc-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.eval-legend {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+  text-align: center;
+}
+
+/* Move table */
+.move-table-wrapper {
+  overflow-x: auto;
+}
+
+.move-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.move-table th {
+  padding: 0.4rem 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.move-table td {
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid rgba(42, 58, 92, 0.3);
+}
+
+.move-number {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  width: 30px;
+}
+
+.move-san {
+  font-weight: 500;
+  min-width: 50px;
+}
+
+.move-eval {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  min-width: 55px;
+}
+
+.move-cpl {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  min-width: 45px;
+}
+
+.class-icon {
+  font-size: 0.8rem;
+  font-weight: 700;
+  min-width: 20px;
+  display: inline-block;
+}
+
+.class-icon.blunder { color: var(--danger); }
+.class-icon.mistake { color: var(--warning); }
+.class-icon.inaccuracy { color: #e67e22; }
+
+/* Move classification colors */
+.move-san.blunder { color: var(--danger); }
+.move-san.mistake { color: var(--warning); }
+.move-san.inaccuracy { color: #e67e22; }
+.move-san.good { color: #fff; }
+.move-san.book { color: var(--text-muted); }
