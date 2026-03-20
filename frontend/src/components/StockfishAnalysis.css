@@ -70,6 +70,113 @@
   text-align: center;
 }
 
+/* Phase accuracy section */
+.phase-accuracy-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.phase-accuracy-block {
+  background: var(--bg-card2);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.phase-white { border-top: 3px solid #ccc; }
+.phase-black { border-top: 3px solid #555; }
+
+.phase-player-label {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.phase-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.phase-table td {
+  padding: 0.25rem 0.5rem;
+}
+
+.phase-name {
+  color: var(--text-muted);
+}
+
+.phase-val {
+  text-align: right;
+  font-weight: 600;
+}
+
+/* Tactic accuracy section */
+.tactic-accuracy-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.tactic-block {
+  background: var(--bg-card2);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.tactic-white { border-top: 3px solid #ccc; }
+.tactic-black { border-top: 3px solid #555; }
+
+.tactic-player-label {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.tactic-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.tactic-found { color: #27ae60; font-weight: 600; }
+.tactic-missed { color: #e74c3c; font-weight: 600; }
+.tactic-pct { font-size: 1.2rem; font-weight: 700; margin-left: auto; }
+
+.tactic-type-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.tactic-type-table td {
+  padding: 0.2rem 0.4rem;
+  border-bottom: 1px solid rgba(42, 58, 92, 0.3);
+}
+
+.tactic-type-name {
+  color: var(--text-muted);
+}
+
+.tactic-type-found { color: #27ae60; }
+.tactic-type-missed { color: #e74c3c; }
+
+.tactic-type-pct {
+  text-align: right;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.tactic-none {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
 /* Move table */
 .move-table-wrapper {
   overflow-x: auto;
@@ -133,3 +240,13 @@
 .move-san.inaccuracy { color: #e67e22; }
 .move-san.good { color: #fff; }
 .move-san.book { color: var(--text-muted); }
+
+/* Tactic icon inside move cells */
+.tactic-icon {
+  font-size: 0.7rem;
+  margin-left: 3px;
+  vertical-align: middle;
+}
+
+.tactic-icon-found { color: #27ae60; }
+.tactic-icon-missed { color: #e67e22; }
