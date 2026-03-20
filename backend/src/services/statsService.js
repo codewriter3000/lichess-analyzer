@@ -85,14 +85,28 @@ function computeStats(games, username) {
 
     // Opening stats
     if (game.opening || game.eco) {
-      const key = game.opening || game.eco;
-      if (!openingCounts[key]) {
-        openingCounts[key] = { name: key, total: 0, wins: 0, losses: 0, draws: 0 };
+      const eco = game.eco || null;
+      const openingName =
+        game.opening && game.opening !== game.eco
+          ? game.opening
+          : null;
+      const aggregateKey = `${eco || ''}|${openingName || ''}`;
+
+      if (!openingCounts[aggregateKey]) {
+        openingCounts[aggregateKey] = {
+          name: openingName || (eco ? `ECO ${eco}` : 'Unknown Opening'),
+          openingName,
+          eco,
+          total: 0,
+          wins: 0,
+          losses: 0,
+          draws: 0,
+        };
       }
-      openingCounts[key].total++;
-      if (outcome === 'win') openingCounts[key].wins++;
-      else if (outcome === 'loss') openingCounts[key].losses++;
-      else if (outcome === 'draw') openingCounts[key].draws++;
+      openingCounts[aggregateKey].total++;
+      if (outcome === 'win') openingCounts[aggregateKey].wins++;
+      else if (outcome === 'loss') openingCounts[aggregateKey].losses++;
+      else if (outcome === 'draw') openingCounts[aggregateKey].draws++;
     }
 
     // Game length

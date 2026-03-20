@@ -170,7 +170,8 @@ export default function GameStats({ username, gameCount }) {
             <table>
               <thead>
                 <tr>
-                  <th>Opening</th>
+                  <th>Opening Name</th>
+                  <th>ECO</th>
                   <th>Games</th>
                   <th>Wins</th>
                   <th>Losses</th>
@@ -180,8 +181,9 @@ export default function GameStats({ username, gameCount }) {
               </thead>
               <tbody>
                 {stats.topOpenings.map(op => (
-                  <tr key={op.name}>
-                    <td>{op.name}</td>
+                  <tr key={`${op.eco || 'no-eco'}-${op.openingName || op.name}`}>
+                    <td>{op.openingName || op.name}</td>
+                    <td>{op.eco || '-'}</td>
                     <td>{op.total}</td>
                     <td className="win">{op.wins}</td>
                     <td className="loss">{op.losses}</td>

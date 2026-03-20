@@ -12,7 +12,6 @@ router.get('/', (req, res) => {
   }
 
   const username = req.query.username || req.app.locals.username || null;
-  console.log(`Computing stats for username: ${username}`);
   const stats = computeStats(games, username);
   res.json(stats);
 });

@@ -1,4 +1,10 @@
 const { Chess } = require('chess.js');
+const { eco } = require('chess-openings/dist/chess/openings/eco');
+
+const ECO_OPENING_NAMES = buildEcoOpeningNames();
+const ECO_NAME_OVERRIDES = {
+  C46: 'Four Knights Game',
+};
 
 /**
  * Parse a PGN string containing one or more games.
@@ -18,6 +24,8 @@ function parsePgn(pgnText) {
       const headers = chess.header();
       const moves = chess.history({ verbose: true });
       const result = headers.Result || '*';
+      const eco = headers.ECO || null;
+      const opening = resolveOpeningName(headers.Opening, eco);
 
       games.push({
         headers,
@@ -29,8 +37,8 @@ function parsePgn(pgnText) {
         blackElo: parseElo(headers.BlackElo),
         result,
         date: parseDate(headers.UTCDate || headers.Date),
-        opening: headers.Opening || headers.ECO || null,
-        eco: headers.ECO || null,
+        opening,
+        eco,
         timeControl: headers.TimeControl || null,
         termination: headers.Termination || null,
         plyCount: moves.length,
@@ -91,6 +99,46 @@ function parseDate(dateStr) {
     return `${match[1]}-${match[2]}-${match[3]}`;
   }
   return dateStr;
+}
+
+function resolveOpeningName(openingHeader, eco) {
+  const openingText = typeof openingHeader === 'string' ? openingHeader.trim() : '';
+  const ecoCode = typeof eco === 'string' ? eco.trim().toUpperCase() : '';
+
+  if (openingText) {
+    // Some exports put ECO code in Opening; prefer mapped opening name when available.
+    if (/^[A-E]\d{2}$/.test(openingText.toUpperCase())) {
+      return ECO_OPENING_NAMES[openingText.toUpperCase()] || null;
+    }
+    return openingText;
+  }
+
+  if (ecoCode && ECO_OPENING_NAMES[ecoCode]) {
+    return ECO_NAME_OVERRIDES[ecoCode] || ECO_OPENING_NAMES[ecoCode];
+  }
+
+  return null;
+}
+
+function buildEcoOpeningNames() {
+  const map = {};
+
+  for (const position of Object.values(eco)) {
+    if (!position || !position.eco || !position.name) continue;
+    const code = position.eco;
+    const candidateName = position.name;
+    const existingName = map[code];
+
+    if (
+      !existingName ||
+      candidateName.length < existingName.length ||
+      (candidateName.length === existingName.length && candidateName.localeCompare(existingName) < 0)
+    ) {
+      map[code] = candidateName;
+    }
+  }
+
+  return map;
 }
 
 /**

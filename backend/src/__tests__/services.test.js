@@ -71,6 +71,38 @@ describe('PGN Parser', () => {
     assert.equal(games[0].opening, 'Ruy Lopez: Berlin Defense');
   });
 
+  it('resolves known ECO code to opening name when Opening header is missing', () => {
+    const ecoOnlyPgn = `[Event "Rated Blitz game"]
+[Site "https://lichess.org"]
+[UTCDate "2024.02.02"]
+[White "A"]
+[Black "B"]
+[Result "1-0"]
+[ECO "C46"]
+
+1. e4 e5 2. Nf3 Nc6 3. Nc3 Nf6 1-0`;
+
+    const games = parsePgn(ecoOnlyPgn);
+    assert.equal(games[0].eco, 'C46');
+    assert.equal(games[0].opening, 'Four Knights Game');
+  });
+
+  it('resolves C00 to French Defense when only ECO is provided', () => {
+    const ecoOnlyPgn = `[Event "Rated Blitz game"]
+[Site "https://lichess.org"]
+[UTCDate "2024.03.03"]
+[White "A"]
+[Black "B"]
+[Result "0-1"]
+[ECO "C00"]
+
+1. e4 e6 2. d4 d5 0-1`;
+
+    const games = parsePgn(ecoOnlyPgn);
+    assert.equal(games[0].eco, 'C00');
+    assert.equal(games[0].opening, 'French Defense');
+  });
+
   it('counts ply correctly', () => {
     const games = parsePgn(SAMPLE_PGN);
     assert.equal(games[0].plyCount, 12); // 6 full moves = 12 plies
@@ -144,6 +176,15 @@ describe('Stats Service', () => {
     const games = parsePgn(SAMPLE_PGN);
     const stats = computeStats(games, null);
     assert.equal(stats.total, 2);
+  });
+
+  it('includes opening name and ECO in top openings', () => {
+    const games = parsePgn(SAMPLE_PGN);
+    const stats = computeStats(games, 'Magnus');
+    const opening = stats.topOpenings.find(op => op.eco === 'C65');
+
+    assert.ok(opening);
+    assert.equal(opening.openingName, 'Ruy Lopez: Berlin Defense');
   });
 });
 
