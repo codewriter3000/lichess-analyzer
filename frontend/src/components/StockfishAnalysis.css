@@ -19,6 +19,11 @@
 .move-good      { @apply text-primary; }
 .move-book      { @apply text-primary/50; }
 
+/* ── Selected move highlight ───────────────────────────── */
+.move-selected {
+  @apply bg-primary-container/30 rounded-sm;
+}
+
 /* ── Move table ────────────────────────────────────────── */
 .move-table-th {
   @apply font-label text-[10px] uppercase tracking-widest text-primary/40 px-2 py-2 text-left;

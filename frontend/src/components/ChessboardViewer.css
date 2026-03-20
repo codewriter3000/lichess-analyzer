@@ -1,0 +1,67 @@
+/* ── Chessboard viewer root ────────────────────────────── */
+.cb-root {
+  @apply flex flex-col items-center gap-3;
+}
+
+/* ── Board wrapper (border + shadow) ──────────────────── */
+.cb-board-wrap {
+  @apply rounded-sm overflow-hidden shadow-md;
+  border: 2px solid rgba(22, 52, 40, 0.15);
+}
+
+/* ── Move info strip below the board ─────────────────── */
+.cb-info-strip {
+  @apply flex items-center gap-2 h-8 min-w-0 px-3;
+}
+
+.cb-move-label {
+  @apply font-headline text-base text-primary font-semibold;
+}
+
+.cb-start-label {
+  @apply text-primary/50 font-normal;
+}
+
+.cb-class-label {
+  @apply font-label text-xs uppercase tracking-widest text-primary/50;
+}
+
+.cb-eval {
+  @apply font-label text-xs text-primary/60 ml-auto;
+}
+
+/* ── Classification badges ────────────────────────────── */
+.cb-badge {
+  @apply font-label text-xs font-bold px-1.5 py-0.5 rounded-sm leading-none;
+}
+
+.cb-badge-blunder    { @apply bg-chess-danger/10 text-chess-danger; }
+.cb-badge-mistake    { @apply bg-chess-warning/10 text-chess-warning; }
+.cb-badge-inaccuracy { @apply bg-chess-inaccuracy/10 text-chess-inaccuracy; }
+.cb-badge-good       { @apply bg-chess-success/10 text-chess-success; }
+.cb-badge-book       { @apply text-primary/30; }
+
+/* ── Navigation row ───────────────────────────────────── */
+.cb-nav {
+  @apply flex items-center gap-1;
+}
+
+.cb-nav-btn {
+  @apply flex items-center justify-center w-9 h-9 rounded-sm
+         text-primary/60 hover:text-primary hover:bg-surface-container-high
+         disabled:opacity-25 disabled:cursor-not-allowed
+         transition-colors;
+}
+
+.cb-nav-btn .material-symbols-outlined {
+  font-size: 1.25rem;
+}
+
+.cb-nav-counter {
+  @apply font-label text-xs uppercase tracking-widest text-primary/40 w-12 text-center;
+}
+
+/* ── Keyboard hint ────────────────────────────────────── */
+.cb-kbd-hint {
+  @apply font-label text-[10px] uppercase tracking-widest text-primary/30;
+}

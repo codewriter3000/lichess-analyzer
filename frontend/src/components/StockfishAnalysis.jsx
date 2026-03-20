@@ -1,9 +1,15 @@
+import { useState, useEffect } from 'react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine,
 } from 'recharts';
+import ChessboardViewer from './ChessboardViewer';
 import './StockfishAnalysis.css';
 
 export default function StockfishAnalysis({ result, game, isAnalyzing }) {
+  const [selectedMoveIndex, setSelectedMoveIndex] = useState(-1);
+
+  // Reset board position whenever a new analysis result loads
+  useEffect(() => { setSelectedMoveIndex(-1); }, [result]);
   if (isAnalyzing) {
     return (
       <div className="analysis-state-card">
@@ -56,6 +62,19 @@ export default function StockfishAnalysis({ result, game, isAnalyzing }) {
           </p>
         </div>
       )}
+
+      {/* Board viewer */}
+      <div className="analysis-section">
+        <div className="card-section-header">
+          <h3 className="card-title">Board</h3>
+          <span className="material-symbols-outlined text-secondary">chess</span>
+        </div>
+        <ChessboardViewer
+          moves={moves}
+          selectedIndex={selectedMoveIndex}
+          onSelectIndex={setSelectedMoveIndex}
+        />
+      </div>
 
       {/* Accuracy summary */}
       <div className="analysis-section">
@@ -145,13 +164,27 @@ export default function StockfishAnalysis({ result, game, isAnalyzing }) {
               </tr>
             </thead>
             <tbody>
-              {pairMoves(moves).map(pair => (
-                <tr key={pair.moveNumber} className="border-b border-primary/5 hover:bg-surface-container-high transition-colors">
-                  <td className="px-2 py-2 font-label text-xs text-primary/40">{pair.moveNumber}.</td>
-                  <MoveCell move={pair.white} />
-                  <MoveCell move={pair.black} />
-                </tr>
-              ))}
+              {pairMoves(moves).map(pair => {
+                const whiteIdx = (pair.moveNumber - 1) * 2;
+                const blackIdx = whiteIdx + 1;
+                return (
+                  <tr key={pair.moveNumber} className="border-b border-primary/5">
+                    <td className="px-2 py-2 font-label text-xs text-primary/40">{pair.moveNumber}.</td>
+                    <MoveCell
+                      move={pair.white}
+                      moveIndex={whiteIdx}
+                      selectedIndex={selectedMoveIndex}
+                      onSelect={setSelectedMoveIndex}
+                    />
+                    <MoveCell
+                      move={pair.black}
+                      moveIndex={blackIdx}
+                      selectedIndex={selectedMoveIndex}
+                      onSelect={setSelectedMoveIndex}
+                    />
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -256,7 +289,7 @@ function TacticAccuracyBlock({ label, tacticData }) {
   );
 }
 
-function MoveCell({ move }) {
+function MoveCell({ move, moveIndex, selectedIndex, onSelect }) {
   if (!move) return <><td /><td /><td /><td /></>;
   const evalStr = move.evalAfter !== null
     ? (move.evalAfter > 0 ? '+' : '') + (move.evalAfter / 100).toFixed(2)
@@ -270,9 +303,20 @@ function MoveCell({ move }) {
     book:       'move-book',
   }[move.classification] ?? 'move-good';
 
+  const isSelected = moveIndex === selectedIndex;
+  const tdCls = [
+    'px-2 py-2 font-body cursor-pointer hover:bg-surface-container-high transition-colors',
+    cls,
+    isSelected ? 'move-selected' : '',
+  ].filter(Boolean).join(' ');
+
   return (
     <>
-      <td className={`px-2 py-2 font-body ${cls}`}>
+      <td
+        className={tdCls}
+        onClick={() => onSelect(moveIndex)}
+        title={`Go to move ${move.moveNumber}${move.color === 'white' ? '.' : '…'}${move.san}`}
+      >
         {move.san}
         {move.tactic && (
           <span
