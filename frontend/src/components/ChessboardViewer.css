@@ -30,6 +30,15 @@
   @apply font-label text-xs text-primary/60 ml-auto;
 }
 
+.cb-bestmove-icon {
+  @apply text-secondary text-base;
+}
+
+.cb-copy-btn {
+  @apply ml-2 px-2 py-1 rounded-sm border border-primary/20 text-primary/70
+         font-label text-[10px] uppercase tracking-widest hover:bg-surface-container-high;
+}
+
 /* ── Classification badges ────────────────────────────── */
 .cb-badge {
   @apply font-label text-xs font-bold px-1.5 py-0.5 rounded-sm leading-none;

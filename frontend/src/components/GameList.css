@@ -10,6 +10,25 @@
   @apply text-input w-16 px-2 py-2 text-center;
 }
 
+.game-list-progress-track {
+  @apply w-full h-1.5 rounded-full bg-surface-container-high overflow-hidden;
+}
+
+.game-list-progress-fill {
+  @apply h-full bg-primary;
+  width: 28%;
+  animation: game-list-indeterminate 1.2s ease-in-out infinite;
+}
+
+@keyframes game-list-indeterminate {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(390%);
+  }
+}
+
 .game-feed {
   @apply content-card overflow-hidden;
 }

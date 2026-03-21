@@ -20,6 +20,22 @@
   @apply opacity-90;
 }
 
+.stats-progress-wrap {
+  @apply space-y-1.5;
+}
+
+.stats-progress-head {
+  @apply flex justify-between font-label text-xs uppercase tracking-widest text-primary/60;
+}
+
+.stats-progress-track {
+  @apply w-full h-2 rounded-full bg-surface-container-highest overflow-hidden;
+}
+
+.stats-progress-fill {
+  @apply h-full bg-primary transition-all duration-300;
+}
+
 /* ── Section cards ─────────────────────────────────────── */
 
 .stats-section {

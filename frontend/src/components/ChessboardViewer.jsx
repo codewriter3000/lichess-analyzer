@@ -46,6 +46,7 @@ function moveLabel(index) {
 
 export default function ChessboardViewer({ moves, selectedIndex, onSelectIndex }) {
   const [fens, setFens] = useState([]);
+  const [copyLabel, setCopyLabel] = useState('Copy FEN');
 
   useEffect(() => {
     if (moves && moves.length > 0) {
@@ -105,6 +106,17 @@ export default function ChessboardViewer({ moves, selectedIndex, onSelectIndex }
     ? (CLASSIFICATION_LABELS[currentMove.classification] ?? CLASSIFICATION_LABELS.good)
     : null;
 
+  async function handleCopyFen() {
+    try {
+      await navigator.clipboard.writeText(currentFen);
+      setCopyLabel('Copied');
+      setTimeout(() => setCopyLabel('Copy FEN'), 1200);
+    } catch {
+      setCopyLabel('Copy failed');
+      setTimeout(() => setCopyLabel('Copy FEN'), 1200);
+    }
+  }
+
   return (
     <div className="cb-root">
       {/* Board */}
@@ -135,10 +147,36 @@ export default function ChessboardViewer({ moves, selectedIndex, onSelectIndex }
             {classInfo?.label && (
               <span className="cb-class-label">{classInfo.label}</span>
             )}
+            {currentMove?.bestMove && (
+              <span
+                className="material-symbols-outlined cb-bestmove-icon"
+                title={`Best move in this position: ${currentMove.bestMove}`}
+              >
+                tips_and_updates
+              </span>
+            )}
             {evalStr && <span className="cb-eval">{evalStr}</span>}
+            <button
+              type="button"
+              className="cb-copy-btn"
+              onClick={handleCopyFen}
+              title="Copy current FEN"
+            >
+              {copyLabel}
+            </button>
           </>
         ) : (
-          <span className="cb-move-label cb-start-label">Starting position</span>
+          <>
+            <span className="cb-move-label cb-start-label">Starting position</span>
+            <button
+              type="button"
+              className="cb-copy-btn"
+              onClick={handleCopyFen}
+              title="Copy current FEN"
+            >
+              {copyLabel}
+            </button>
+          </>
         )}
       </div>
 

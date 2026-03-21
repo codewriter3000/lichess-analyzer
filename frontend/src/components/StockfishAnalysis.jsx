@@ -23,6 +23,9 @@ export default function StockfishAnalysis({ result, game, isAnalyzing }) {
         <p className="font-label text-sm uppercase tracking-widest text-primary/60">
           Running Stockfish analysis… this may take up to a minute.
         </p>
+        <div className="analysis-progress-track" aria-label="analysis in progress">
+          <div className="analysis-progress-fill" />
+        </div>
       </div>
     );
   }
@@ -330,7 +333,7 @@ function MoveCell({ move, moveIndex, selectedIndex, onSelect }) {
       <td
         className={tdCls}
         onClick={() => onSelect(moveIndex)}
-        title={`Go to move ${move.moveNumber}${move.color === 'white' ? '.' : '…'}${move.san}`}
+        title={`Go to move ${move.moveNumber}${move.color === 'white' ? '.' : '…'}${move.san}${move.bestMove ? ` | Best move: ${move.bestMove}` : ''}`}
       >
         {move.san}
         {move.tactic && (

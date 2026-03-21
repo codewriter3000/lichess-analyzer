@@ -56,6 +56,11 @@ export default function GameList({ games, selectedGame, onSelectGame, onAnalyze,
         <span className="font-label text-xs uppercase tracking-widest text-primary/40">
           {filtered.length} game{filtered.length !== 1 ? 's' : ''}
         </span>
+        {isAnalyzing && (
+          <div className="game-list-progress-track" aria-label="analysis in progress">
+            <div className="game-list-progress-fill" />
+          </div>
+        )}
       </div>
 
       {/* Games feed */}

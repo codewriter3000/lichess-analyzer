@@ -1,5 +1,7 @@
 import express from 'express';
+import { randomUUID } from 'crypto';
 import { analyzeGame } from '../services/stockfishService.js';
+import { getCachedAnalysis, setCachedAnalysis } from '../services/analysisCache.js';
 
 const router = express.Router();
 
@@ -26,6 +28,58 @@ function getLast30Indexes(games, username) {
     .slice(-30);
 }
 
+function createBatchJob({ username, depth, concurrency, considered, skipped }) {
+  return {
+    id: randomUUID(),
+    status: 'running',
+    username: username || null,
+    depth,
+    concurrency,
+    considered,
+    skipped,
+    analyzed: 0,
+    failed: 0,
+    failedGames: [],
+    startedAt: new Date().toISOString(),
+    completedAt: null,
+    error: null,
+  };
+}
+
+function summarizeBatchJob(job) {
+  const done = job.analyzed + job.failed + job.skipped;
+  const percent = job.considered > 0 ? Math.round((done / job.considered) * 100) : 100;
+
+  return {
+    jobId: job.id,
+    status: job.status,
+    username: job.username,
+    depth: job.depth,
+    concurrency: job.concurrency,
+    considered: job.considered,
+    analyzed: job.analyzed,
+    skipped: job.skipped,
+    failed: job.failed,
+    failedGames: job.failedGames,
+    done,
+    percent,
+    startedAt: job.startedAt,
+    completedAt: job.completedAt,
+    error: job.error,
+  };
+}
+
+async function analyzeWithCache(game, depth) {
+  const cached = await getCachedAnalysis(game, depth);
+  if (cached) {
+    return { result: cached, fromCache: true };
+  }
+
+  const computed = await analyzeGame(game, depth);
+  await setCachedAnalysis(game, depth, computed);
+  return { result: computed, fromCache: false };
+}
+
 // POST /api/analyze
 // Body: { gameIndex: number, depth: number (optional, default 15) }
 // Runs Stockfish analysis on the specified game.
@@ -43,12 +97,12 @@ router.post('/', async (req, res) => {
   const depth = clampDepth(req.body.depth);
 
   try {
-    const result = await analyzeGame(games[gameIndex], depth);
+    const { result, fromCache } = await analyzeWithCache(games[gameIndex], depth);
     if (!req.app.locals.analysisByGame) {
       req.app.locals.analysisByGame = {};
     }
     req.app.locals.analysisByGame[gameIndex] = result;
-    res.json(result);
+    res.json({ ...result, meta: { fromCache, depth } });
   } catch (err) {
     res.status(500).json({ error: 'Analysis failed: ' + err.message });
   }
@@ -57,7 +111,7 @@ router.post('/', async (req, res) => {
 // POST /api/analyze/batch-last30
 // Body: { username?: string, depth?: number, reanalyze?: boolean }
 // Analyzes last 30 games for the selected player (or all games if username unavailable).
-router.post('/batch-last30', async (req, res) => {
+router.post('/batch-last30', (req, res) => {
   const games = req.app.locals.games;
   if (!games || games.length === 0) {
     return res.status(404).json({ error: 'No games loaded. Please upload a PGN file first.' });
@@ -71,41 +125,73 @@ router.post('/batch-last30', async (req, res) => {
   if (!req.app.locals.analysisByGame) {
     req.app.locals.analysisByGame = {};
   }
+  if (!req.app.locals.batchAnalyzeJobs) {
+    req.app.locals.batchAnalyzeJobs = {};
+  }
 
   const last30Indexes = getLast30Indexes(games, username);
   const queue = last30Indexes.filter(index => reanalyze || !req.app.locals.analysisByGame[index]);
-  const failedGames = [];
-  let analyzed = 0;
-
-  let cursor = 0;
-  async function worker() {
-    while (cursor < queue.length) {
-      const current = queue[cursor++];
-      try {
-        const result = await analyzeGame(games[current], depth);
-        req.app.locals.analysisByGame[current] = result;
-        analyzed++;
-      } catch (err) {
-        failedGames.push({ gameIndex: current, error: err.message });
-      }
-    }
-  }
-
-  await Promise.all(Array.from({ length: Math.min(concurrency, queue.length || 1) }, () => worker()));
-
-  const failed = failedGames.length;
-  const skipped = last30Indexes.length - analyzed - failed;
-
-  res.json({
-    considered: last30Indexes.length,
-    analyzed,
-    skipped,
-    failed,
-    failedGames,
+  const skipped = last30Indexes.length - queue.length;
+  const job = createBatchJob({
+    username,
     depth,
     concurrency,
-    username: username || null,
+    considered: last30Indexes.length,
+    skipped,
   });
+
+  req.app.locals.batchAnalyzeJobs[job.id] = job;
+
+  if (queue.length === 0) {
+    job.status = 'completed';
+    job.completedAt = new Date().toISOString();
+    return res.json(summarizeBatchJob(job));
+  }
+
+  void (async () => {
+    try {
+      let cursor = 0;
+      async function worker() {
+        while (cursor < queue.length) {
+          const current = queue[cursor++];
+          try {
+            const { result, fromCache } = await analyzeWithCache(games[current], depth);
+            req.app.locals.analysisByGame[current] = result;
+            if (fromCache) {
+              job.skipped++;
+            } else {
+              job.analyzed++;
+            }
+          } catch (err) {
+            job.failed++;
+            job.failedGames.push({ gameIndex: current, error: err.message });
+          }
+        }
+      }
+
+      await Promise.all(Array.from({ length: Math.min(concurrency, queue.length) }, () => worker()));
+      job.status = 'completed';
+      job.completedAt = new Date().toISOString();
+    } catch (err) {
+      job.status = 'failed';
+      job.error = err.message;
+      job.completedAt = new Date().toISOString();
+    }
+  })();
+
+  return res.json(summarizeBatchJob(job));
+});
+
+// GET /api/analyze/batch-last30/:jobId
+// Returns progress for a background batch analysis job.
+router.get('/batch-last30/:jobId', (req, res) => {
+  const jobs = req.app.locals.batchAnalyzeJobs || {};
+  const job = jobs[req.params.jobId];
+  if (!job) {
+    return res.status(404).json({ error: 'Batch analysis job not found' });
+  }
+
+  return res.json(summarizeBatchJob(job));
 });
 
 export default router;

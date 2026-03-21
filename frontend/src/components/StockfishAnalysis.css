@@ -6,6 +6,25 @@
   @apply content-card p-8;
 }
 
+.analysis-progress-track {
+  @apply w-full max-w-md h-2 rounded-full bg-surface-container-high overflow-hidden;
+}
+
+.analysis-progress-fill {
+  @apply h-full bg-primary;
+  width: 30%;
+  animation: analysis-indeterminate 1.2s ease-in-out infinite;
+}
+
+@keyframes analysis-indeterminate {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(380%);
+  }
+}
+
 /* ── Accuracy colour helpers ───────────────────────────── */
 .acc-muted { @apply text-primary/40; }
 .acc-good  { @apply text-chess-success; }

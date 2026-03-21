@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, BarChart, Bar,
@@ -11,13 +11,25 @@ function readRgbVar(varName, fallback) {
   return value ? `rgb(${value})` : fallback;
 }
 
-export default function GameStats({ username, gameCount }) {
+export default function GameStats({ username, gameCount, onOpenTacticsDetails }) {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [reloadKey, setReloadKey] = useState(0);
   const [isAnalyzingLast30, setIsAnalyzingLast30] = useState(false);
   const [analyzeLast30Message, setAnalyzeLast30Message] = useState('');
+  const [analyzeLast30Progress, setAnalyzeLast30Progress] = useState(null);
+  const pollTimerRef = useRef(null);
+  const pollErrorCountRef = useRef(0);
+
+  useEffect(() => {
+    return () => {
+      if (pollTimerRef.current) {
+        clearInterval(pollTimerRef.current);
+        pollTimerRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     async function fetchStats() {
@@ -38,9 +50,43 @@ export default function GameStats({ username, gameCount }) {
     if (gameCount > 0) fetchStats();
   }, [username, gameCount, reloadKey]);
 
+  async function pollBatchJob(jobId) {
+    const res = await fetch(`/api/analyze/batch-last30/${jobId}`);
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to read analysis progress');
+    }
+
+    setAnalyzeLast30Progress(data);
+
+    if (data.status === 'completed' || data.status === 'failed') {
+      if (pollTimerRef.current) {
+        clearInterval(pollTimerRef.current);
+        pollTimerRef.current = null;
+      }
+
+      setIsAnalyzingLast30(false);
+      if (data.status === 'completed') {
+        setAnalyzeLast30Message(
+          `Analyzed ${data.analyzed}, skipped ${data.skipped}, failed ${data.failed} (window: ${data.considered}).`
+        );
+        setReloadKey(prev => prev + 1);
+      } else {
+        setAnalyzeLast30Message(`Analysis failed: ${data.error || 'Unexpected error'}`);
+      }
+    }
+  }
+
   async function handleAnalyzeLast30() {
+    if (pollTimerRef.current) {
+      clearInterval(pollTimerRef.current);
+      pollTimerRef.current = null;
+    }
+
+    pollErrorCountRef.current = 0;
     setIsAnalyzingLast30(true);
     setAnalyzeLast30Message('');
+    setAnalyzeLast30Progress(null);
 
     try {
       const res = await fetch('/api/analyze/batch-last30', {
@@ -54,13 +100,41 @@ export default function GameStats({ username, gameCount }) {
         throw new Error(data.error || 'Failed to analyze last 30 games');
       }
 
-      setAnalyzeLast30Message(
-        `Analyzed ${data.analyzed}, skipped ${data.skipped}, failed ${data.failed} (window: ${data.considered}).`
-      );
-      setReloadKey(prev => prev + 1);
+      setAnalyzeLast30Progress(data);
+
+      if (data.status === 'completed' || data.status === 'failed') {
+        setIsAnalyzingLast30(false);
+        if (data.status === 'completed') {
+          setAnalyzeLast30Message(
+            `Analyzed ${data.analyzed}, skipped ${data.skipped}, failed ${data.failed} (window: ${data.considered}).`
+          );
+          setReloadKey(prev => prev + 1);
+        } else {
+          setAnalyzeLast30Message(`Analysis failed: ${data.error || 'Unexpected error'}`);
+        }
+        return;
+      }
+
+      pollTimerRef.current = setInterval(async () => {
+        try {
+          await pollBatchJob(data.jobId);
+          pollErrorCountRef.current = 0;
+        } catch (pollErr) {
+          pollErrorCountRef.current += 1;
+          if (pollErrorCountRef.current >= 2) {
+            if (pollTimerRef.current) {
+              clearInterval(pollTimerRef.current);
+              pollTimerRef.current = null;
+            }
+            setIsAnalyzingLast30(false);
+            setAnalyzeLast30Message(
+              `Lost connection to backend while tracking progress: ${pollErr.message}. Restart backend and run Analyze Last 30 again.`
+            );
+          }
+        }
+      }, 1000);
     } catch (e) {
       setAnalyzeLast30Message(`Analysis failed: ${e.message}`);
-    } finally {
       setIsAnalyzingLast30(false);
     }
   }
@@ -243,6 +317,14 @@ export default function GameStats({ username, gameCount }) {
               <button
                 type="button"
                 className="stats-action-btn"
+                onClick={() => onOpenTacticsDetails?.()}
+                disabled={!onOpenTacticsDetails}
+              >
+                Open Detail Page
+              </button>
+              <button
+                type="button"
+                className="stats-action-btn"
                 onClick={handleAnalyzeLast30}
                 disabled={isAnalyzingLast30}
               >
@@ -259,6 +341,22 @@ export default function GameStats({ username, gameCount }) {
           </p>
           {analyzeLast30Message && (
             <p className="stats-subtext mt-2">{analyzeLast30Message}</p>
+          )}
+          {analyzeLast30Progress && (
+            <div className="stats-progress-wrap mt-3">
+              <div className="stats-progress-head">
+                <span>
+                  {analyzeLast30Progress.done}/{analyzeLast30Progress.considered} games
+                </span>
+                <span>{analyzeLast30Progress.percent}%</span>
+              </div>
+              <div className="stats-progress-track">
+                <div
+                  className="stats-progress-fill"
+                  style={{ width: `${analyzeLast30Progress.percent}%` }}
+                />
+              </div>
+            </div>
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
             <TacticSummaryCard

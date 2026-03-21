@@ -284,4 +284,109 @@ function aggregateTacticsLast30(games, playerGames, username, analysisByGame) {
   };
 }
 
-export { computeStats };
+function computeTacticsDetailsLast30(games, username, analysisByGame = {}) {
+  if (!games || games.length === 0) {
+    return {
+      window: 30,
+      gamesConsidered: 0,
+      gamesWithAnalysis: 0,
+      gamesWithoutAnalysis: 0,
+      analyzedGames: [],
+      playerEvents: [],
+      opponentEvents: [],
+    };
+  }
+
+  const gamesWithIndex = games.map((game, index) => ({ game, index }));
+  const playerGames = username
+    ? gamesWithIndex.filter(
+        ({ game }) =>
+          game.white.toLowerCase() === username.toLowerCase() ||
+          game.black.toLowerCase() === username.toLowerCase()
+      )
+    : gamesWithIndex;
+
+  const recentGames = playerGames.slice(-30);
+  const analyzedGames = [];
+  const playerEvents = [];
+  const opponentEvents = [];
+
+  for (const { game, index } of recentGames) {
+    const analysis = analysisByGame[index];
+    if (!analysis?.moves) continue;
+
+    analyzedGames.push({
+      gameIndex: index,
+      white: game.white,
+      black: game.black,
+      whiteElo: game.whiteElo,
+      blackElo: game.blackElo,
+      date: game.date,
+      opening: game.opening,
+      result: game.result,
+      moves: analysis.moves,
+    });
+
+    let playerSide = 'white';
+    let opponentSide = 'black';
+
+    if (username) {
+      const lower = username.toLowerCase();
+      if (game.white.toLowerCase() === lower) {
+        playerSide = 'white';
+        opponentSide = 'black';
+      } else if (game.black.toLowerCase() === lower) {
+        playerSide = 'black';
+        opponentSide = 'white';
+      }
+    }
+
+    analysis.moves.forEach((move, moveIndex) => {
+      if (!move?.tactic) return;
+
+      const event = {
+        id: `${index}:${moveIndex}`,
+        gameIndex: index,
+        moveIndex,
+        moveNumber: move.moveNumber,
+        color: move.color,
+        san: move.san,
+        bestMove: move.bestMove || null,
+        tacticType: move.tactic.type,
+        found: Boolean(move.tactic.found),
+        classification: move.classification,
+        cploss: move.cploss,
+        white: game.white,
+        black: game.black,
+        date: game.date,
+        opening: game.opening,
+      };
+
+      if (move.color === playerSide) {
+        playerEvents.push(event);
+      } else if (move.color === opponentSide) {
+        opponentEvents.push(event);
+      }
+    });
+  }
+
+  const sortFn = (a, b) => {
+    if (a.gameIndex !== b.gameIndex) return b.gameIndex - a.gameIndex;
+    return a.moveIndex - b.moveIndex;
+  };
+
+  playerEvents.sort(sortFn);
+  opponentEvents.sort(sortFn);
+
+  return {
+    window: 30,
+    gamesConsidered: recentGames.length,
+    gamesWithAnalysis: analyzedGames.length,
+    gamesWithoutAnalysis: Math.max(0, recentGames.length - analyzedGames.length),
+    analyzedGames,
+    playerEvents,
+    opponentEvents,
+  };
+}
+
+export { computeStats, computeTacticsDetailsLast30 };

@@ -1,0 +1,15 @@
+.tactic-loading-card {
+  @apply content-card p-12 flex items-center gap-3 font-label text-sm uppercase tracking-widest text-primary/60;
+}
+
+.tactic-error-card {
+  @apply content-card p-6 text-chess-danger font-body text-sm;
+}
+
+.tactic-event-btn {
+  @apply w-full text-left p-3 rounded-sm bg-surface-container-high border border-primary/10 hover:bg-surface-container-highest transition-colors;
+}
+
+.tactic-event-btn.selected {
+  @apply border-secondary/60 bg-surface-container-highest;
+}

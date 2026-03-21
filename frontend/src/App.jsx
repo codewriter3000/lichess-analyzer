@@ -3,6 +3,7 @@ import FileUpload from './components/FileUpload';
 import GameList from './components/GameList';
 import GameStats from './components/GameStats';
 import StockfishAnalysis from './components/StockfishAnalysis';
+import TacticsDetailPage from './components/TacticsDetailPage';
 import ExportButton from './components/ExportButton';
 import './App.css';
 
@@ -60,6 +61,7 @@ export default function App() {
     { id: 'library',     icon: 'library_books', label: 'Library'     },
     { id: 'analysis',    icon: 'query_stats',   label: 'Analysis'    },
     { id: 'statistics',  icon: 'auto_graph',    label: 'Statistics'  },
+    { id: 'tactics',     icon: 'bolt',          label: 'Tactics'     },
     { id: 'manuscripts', icon: 'history_edu',   label: 'Manuscripts' },
   ];
 
@@ -67,6 +69,7 @@ export default function App() {
     library:     { section: 'Game Collection',   title: 'Library'     },
     analysis:    { section: 'Stockfish Engine',   title: 'Analysis'    },
     statistics:  { section: 'Performance Record', title: 'Statistics'  },
+    tactics:     { section: 'Tactic Deep Dive',   title: 'Tactics'     },
     manuscripts: { section: 'Upload Archive',     title: 'Manuscripts' },
   };
 
@@ -81,6 +84,7 @@ export default function App() {
           <button className="topnav-btn" onClick={() => setActiveTab('library')}>Library</button>
           <button className="topnav-btn" onClick={() => setActiveTab('analysis')}>Analysis</button>
           <button className="topnav-btn" onClick={() => setActiveTab('statistics')}>Statistics</button>
+          <button className="topnav-btn" onClick={() => setActiveTab('tactics')}>Tactics</button>
         </nav>
         <div className="flex items-center gap-6">
           <span className="material-symbols-outlined topbar-icon-btn">menu_book</span>
@@ -200,7 +204,15 @@ export default function App() {
           )}
 
           {games.length > 0 && activeTab === 'statistics' && (
-            <GameStats username={username} gameCount={games.length} />
+            <GameStats
+              username={username}
+              gameCount={games.length}
+              onOpenTacticsDetails={() => setActiveTab('tactics')}
+            />
+          )}
+
+          {games.length > 0 && activeTab === 'tactics' && (
+            <TacticsDetailPage username={username} />
           )}
 
           {activeTab === 'analysis' && (
