@@ -39,4 +39,4 @@ function csvEscape(value) {
   return str;
 }
 
-module.exports = { buildCsv };
+export { buildCsv };

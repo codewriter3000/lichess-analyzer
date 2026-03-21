@@ -1,5 +1,5 @@
-const express = require('express');
-const { computeStats } = require('../services/statsService');
+import express from 'express';
+import { computeStats } from '../services/statsService.js';
 
 const router = express.Router();
 
@@ -12,8 +12,9 @@ router.get('/', (req, res) => {
   }
 
   const username = req.query.username || req.app.locals.username || null;
-  const stats = computeStats(games, username);
+  const analysisByGame = req.app.locals.analysisByGame || {};
+  const stats = computeStats(games, username, analysisByGame);
   res.json(stats);
 });
 
-module.exports = router;
+export default router;

@@ -1,7 +1,12 @@
-const { spawn } = require('child_process');
-const { Chess } = require('chess.js');
+import { spawn } from 'child_process';
+import { Chess } from 'chess.js';
 
-const STOCKFISH_PATH = process.env.STOCKFISH_PATH || '/usr/games/stockfish';
+const DEFAULT_STOCKFISH_PATH = process.platform === 'win32'
+  ? 'C:\\Program Files\\stockfish\\stockfish-windows-x86-64-avx2.exe'
+  : '/usr/games/stockfish';
+const STOCKFISH_PATH = process.env.STOCKFISH_PATH || DEFAULT_STOCKFISH_PATH;
+const STOCKFISH_THREADS = Math.max(1, parseInt(process.env.STOCKFISH_THREADS || '1', 10) || 1);
+const STOCKFISH_HASH_MB = Math.max(16, parseInt(process.env.STOCKFISH_HASH_MB || '128', 10) || 128);
 const DEFAULT_DEPTH = 15;
 const ANALYSIS_TIMEOUT_MS = 60000;
 
@@ -129,7 +134,8 @@ function analyzeGame(game, depth = DEFAULT_DEPTH) {
     // Start: initialize engine then wait for readyok
     send('uci');
     send('setoption name UCI_AnalyseMode value true');
-    send('setoption name Threads value 1');
+    send(`setoption name Threads value ${STOCKFISH_THREADS}`);
+    send(`setoption name Hash value ${STOCKFISH_HASH_MB}`);
     send('isready');
   });
 }
@@ -448,4 +454,4 @@ function winRate(cp) {
   return 1 / (1 + Math.exp(-0.00368208 * cp));
 }
 
-module.exports = { analyzeGame, getGamePhase, classifyTacticType };
+export { analyzeGame, getGamePhase, classifyTacticType };

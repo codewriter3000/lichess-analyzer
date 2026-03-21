@@ -1,6 +1,6 @@
-const express = require('express');
-const multer = require('multer');
-const { parsePgn, inferUsername } = require('../services/pgnParser');
+import express from 'express';
+import multer from 'multer';
+import { parsePgn, inferUsername } from '../services/pgnParser.js';
 
 const router = express.Router();
 const upload = multer({
@@ -34,6 +34,7 @@ router.post('/', upload.single('pgn'), (req, res) => {
   req.app.locals.games = games;
   req.app.locals.pgnText = pgnText;
   req.app.locals.username = inferredUsername;
+  req.app.locals.analysisByGame = {};
 
   res.json({
     message: `Parsed ${games.length} game(s)`,
@@ -54,4 +55,4 @@ router.post('/', upload.single('pgn'), (req, res) => {
   });
 });
 
-module.exports = router;
+export default router;

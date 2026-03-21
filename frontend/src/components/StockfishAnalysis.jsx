@@ -5,6 +5,12 @@ import {
 import ChessboardViewer from './ChessboardViewer';
 import './StockfishAnalysis.css';
 
+function readRgbVar(varName, fallback) {
+  if (typeof window === 'undefined') return fallback;
+  const value = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+  return value ? `rgb(${value})` : fallback;
+}
+
 export default function StockfishAnalysis({ result, game, isAnalyzing }) {
   const [selectedMoveIndex, setSelectedMoveIndex] = useState(-1);
 
@@ -34,6 +40,15 @@ export default function StockfishAnalysis({ result, game, isAnalyzing }) {
   }
 
   const { moves, whiteAccuracy, blackAccuracy, summary, phaseAccuracy, tacticAccuracy } = result;
+
+  const chartColors = {
+    primary: readRgbVar('--color-primary', '#163428'),
+    secondary: readRgbVar('--color-secondary', '#77574d'),
+    grid: readRgbVar('--chart-grid', 'rgba(22,52,40,0.08)'),
+    axis: readRgbVar('--chart-axis', '#163428'),
+    tooltipBg: readRgbVar('--tooltip-bg', '#f2ede4'),
+    tooltipBorder: readRgbVar('--tooltip-border', 'rgba(22,52,40,0.1)'),
+  };
 
   const chartData = moves.map(m => ({
     name: `${m.moveNumber}${m.color === 'white' ? '.' : '…'}${m.san}`,
@@ -127,19 +142,19 @@ export default function StockfishAnalysis({ result, game, isAnalyzing }) {
             <AreaChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
               <defs>
                 <linearGradient id="evalGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"  stopColor="#163428" stopOpacity={0.15} />
-                  <stop offset="95%" stopColor="#163428" stopOpacity={0} />
+                  <stop offset="5%"  stopColor={chartColors.primary} stopOpacity={0.22} />
+                  <stop offset="95%" stopColor={chartColors.primary} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(22,52,40,0.08)" />
+              <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
               <XAxis dataKey="name" tick={false} />
-              <YAxis domain={[-10, 10]} tick={{ fill: '#163428', opacity: 0.4, fontSize: 11 }} />
-              <ReferenceLine y={0} stroke="#77574d" strokeDasharray="4 2" />
+              <YAxis domain={[-10, 10]} tick={{ fill: chartColors.axis, opacity: 0.8, fontSize: 11 }} />
+              <ReferenceLine y={0} stroke={chartColors.secondary} strokeDasharray="4 2" />
               <Tooltip
-                contentStyle={{ background: '#f2ede4', border: '1px solid rgba(22,52,40,0.1)', borderRadius: '2px', fontSize: '0.85rem' }}
+                contentStyle={{ background: chartColors.tooltipBg, border: `1px solid ${chartColors.tooltipBorder}`, borderRadius: '2px', fontSize: '0.85rem' }}
                 formatter={val => [`${val > 0 ? '+' : ''}${val.toFixed(2)}`, 'Eval']}
               />
-              <Area type="monotone" dataKey="eval" stroke="#163428" fill="url(#evalGrad)" dot={false} strokeWidth={2} />
+              <Area type="monotone" dataKey="eval" stroke={chartColors.primary} fill="url(#evalGrad)" dot={false} strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
           <p className="eval-legend">

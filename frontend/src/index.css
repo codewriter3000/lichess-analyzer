@@ -2,6 +2,60 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --color-background: 254 249 240;
+  --color-on-background: 29 28 22;
+  --color-primary: 22 52 40;
+  --color-secondary: 119 87 77;
+  --color-tertiary: 30 50 60;
+  --color-surface-container: 242 237 228;
+  --color-surface-container-high: 236 232 223;
+  --color-surface-container-highest: 231 226 217;
+  --color-on-primary: 255 255 255;
+  --color-surface-variant: 231 226 217;
+  --chart-grid: 22 52 40;
+  --chart-axis: 22 52 40;
+  --tooltip-bg: 242 237 228;
+  --tooltip-border: 22 52 40;
+  --board-dark: 45 75 62;
+  --board-light: 254 249 240;
+  --board-last-from: 119 87 77;
+  --board-last-to: 119 87 77;
+  --sidebar-shadow: 29 28 22;
+  --chess-danger: 231 76 60;
+  --chess-warning: 230 126 34;
+  --chess-inaccuracy: 10 184 196;
+  --chess-success: 39 174 96;
+  --chess-draw: 127 140 141;
+}
+
+.dark {
+  --color-background: 15 23 42;
+  --color-on-background: 226 232 240;
+  --color-primary: 245 158 11;
+  --color-secondary: 16 185 129;
+  --color-tertiary: 226 232 240;
+  --color-surface-container: 20 31 58;
+  --color-surface-container-high: 29 43 74;
+  --color-surface-container-highest: 41 58 96;
+  --color-on-primary: 15 23 42;
+  --color-surface-variant: 51 65 85;
+  --chart-grid: 148 163 184;
+  --chart-axis: 226 232 240;
+  --tooltip-bg: 20 31 58;
+  --tooltip-border: 148 163 184;
+  --board-dark: 41 58 96;
+  --board-light: 226 232 240;
+  --board-last-from: 245 158 11;
+  --board-last-to: 245 158 11;
+  --sidebar-shadow: 2 6 23;
+  --chess-danger: 248 113 113;
+  --chess-warning: 251 191 36;
+  --chess-inaccuracy: 56 189 248;
+  --chess-success: 16 185 129;
+  --chess-draw: 148 163 184;
+}
+
 @layer base {
   * {
     box-sizing: border-box;
@@ -11,9 +65,15 @@
 
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background-color: #fef9f0;
-    color: #1d1c16;
+    background-color: rgb(var(--color-background));
+    color: rgb(var(--color-on-background));
     min-height: 100vh;
+    transition: background-color 220ms ease, color 220ms ease;
+  }
+
+  .dark body {
+    background-image: radial-gradient(circle at 15% -10%, rgb(30 64 175 / 0.24), transparent 44%),
+      radial-gradient(circle at 90% 0%, rgb(15 118 110 / 0.2), transparent 36%);
   }
 
   .material-symbols-outlined {
@@ -53,19 +113,24 @@
   /* Parchment dot-pattern texture overlay */
   .parchment-overlay {
     @apply absolute inset-0 pointer-events-none;
-    background-image: radial-gradient(#163428 0.5px, transparent 0.5px);
+    background-image: radial-gradient(rgb(var(--color-primary)) 0.5px, transparent 0.5px);
     background-size: 24px 24px;
     background-attachment: fixed;
     opacity: 0.03;
+  }
+
+  .dark .parchment-overlay {
+    opacity: 0.05;
+    background-image: radial-gradient(rgb(var(--color-tertiary) / 0.2) 0.65px, transparent 0.65px);
   }
 }
 
 @layer utilities {
   /* Chess analysis classification colors */
-  .blunder { color: #e74c3c; }
-  .mistake { color: #f39c12; }
-  .inaccuracy { color: #e67e22; }
-  .good { color: #27ae60; }
-  .book { color: #7f8c8d; }
+  .blunder { color: rgb(var(--chess-danger)); }
+  .mistake { color: rgb(var(--chess-warning)); }
+  .inaccuracy { color: rgb(var(--chess-inaccuracy)); }
+  .good { color: rgb(var(--chess-success)); }
+  .book { color: rgb(var(--chess-draw)); }
 }
 

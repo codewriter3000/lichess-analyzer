@@ -7,6 +7,19 @@
   @apply bg-error-container text-on-error-container rounded-sm p-4 font-body text-sm;
 }
 
+.stats-subtext {
+  @apply font-body text-sm text-primary/60;
+}
+
+.stats-action-btn {
+  @apply bg-primary text-on-primary px-4 py-2 rounded-sm font-label text-xs uppercase tracking-widest
+         transition-opacity disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.stats-action-btn:hover {
+  @apply opacity-90;
+}
+
 /* ── Section cards ─────────────────────────────────────── */
 
 .stats-section {

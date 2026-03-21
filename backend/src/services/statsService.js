@@ -2,19 +2,22 @@
  * Compute statistics from an array of parsed games.
  * @param {Array} games - Array of parsed game objects
  * @param {string} username - The player's username to compute stats for
+ * @param {Object} analysisByGame - Map of gameIndex -> Stockfish analysis result
  */
-function computeStats(games, username) {
+function computeStats(games, username, analysisByGame = {}) {
   if (!games || games.length === 0) {
     return { total: 0 };
   }
 
+  const gamesWithIndex = games.map((game, index) => ({ game, index }));
+
   const playerGames = username
-    ? games.filter(
-        g =>
-          g.white.toLowerCase() === username.toLowerCase() ||
-          g.black.toLowerCase() === username.toLowerCase()
+    ? gamesWithIndex.filter(
+        ({ game }) =>
+          game.white.toLowerCase() === username.toLowerCase() ||
+          game.black.toLowerCase() === username.toLowerCase()
       )
-    : games;
+    : gamesWithIndex;
 
   const total = playerGames.length;
 
@@ -38,7 +41,7 @@ function computeStats(games, username) {
   // Game length distribution
   const gameLengths = [];
 
-  for (const game of playerGames) {
+  for (const { game } of playerGames) {
     const isWhite = username
       ? game.white.toLowerCase() === username.toLowerCase()
       : true;
@@ -132,7 +135,7 @@ function computeStats(games, username) {
   let bestWinStreak = 0;
   let tempStreak = 0;
 
-  for (const game of playerGames) {
+  for (const { game } of playerGames) {
     const isWhite = username
       ? game.white.toLowerCase() === username.toLowerCase()
       : true;
@@ -154,7 +157,7 @@ function computeStats(games, username) {
   const reversedGames = [...playerGames].reverse();
   let streakType = null;
   currentStreak = 0;
-  for (const game of reversedGames) {
+  for (const { game } of reversedGames) {
     const isWhite = username
       ? game.white.toLowerCase() === username.toLowerCase()
       : true;
@@ -169,6 +172,8 @@ function computeStats(games, username) {
     if (outcome === streakType) currentStreak++;
     else break;
   }
+
+  const tacticsLast30 = aggregateTacticsLast30(games, playerGames, username, analysisByGame);
 
   return {
     total,
@@ -190,7 +195,93 @@ function computeStats(games, username) {
     bestWinStreak,
     currentStreak,
     currentStreakType: streakType,
+    tacticsLast30,
   };
 }
 
-module.exports = { computeStats };
+function emptyTacticBucket() {
+  return { found: 0, missed: 0, byType: {} };
+}
+
+function addTacticBucket(target, source) {
+  if (!source) return;
+  target.found += source.found || 0;
+  target.missed += source.missed || 0;
+
+  const byType = source.byType || {};
+  for (const [type, stats] of Object.entries(byType)) {
+    if (!target.byType[type]) {
+      target.byType[type] = { found: 0, missed: 0 };
+    }
+    target.byType[type].found += stats.found || 0;
+    target.byType[type].missed += stats.missed || 0;
+  }
+}
+
+function finalizeTacticBucket(bucket) {
+  const total = bucket.found + bucket.missed;
+  const byType = Object.entries(bucket.byType)
+    .sort(([, a], [, b]) => (b.found + b.missed) - (a.found + a.missed))
+    .map(([type, stats]) => {
+      const typeTotal = stats.found + stats.missed;
+      return {
+        type,
+        found: stats.found,
+        missed: stats.missed,
+        total: typeTotal,
+        foundRate: typeTotal > 0 ? Number(((stats.found / typeTotal) * 100).toFixed(1)) : 0,
+      };
+    });
+
+  return {
+    found: bucket.found,
+    missed: bucket.missed,
+    total,
+    foundRate: total > 0 ? Number(((bucket.found / total) * 100).toFixed(1)) : 0,
+    byType,
+  };
+}
+
+function aggregateTacticsLast30(games, playerGames, username, analysisByGame) {
+  const recentGames = playerGames.slice(-30);
+  const playerBucket = emptyTacticBucket();
+  const opponentBucket = emptyTacticBucket();
+  let gamesWithAnalysis = 0;
+
+  for (const { game, index } of recentGames) {
+    const analysis = analysisByGame[index];
+    const tacticAccuracy = analysis?.tacticAccuracy;
+    if (!tacticAccuracy) continue;
+
+    let playerSide = 'white';
+    let opponentSide = 'black';
+
+    if (username) {
+      const lower = username.toLowerCase();
+      if (game.white.toLowerCase() === lower) {
+        playerSide = 'white';
+        opponentSide = 'black';
+      } else if (game.black.toLowerCase() === lower) {
+        playerSide = 'black';
+        opponentSide = 'white';
+      } else {
+        continue;
+      }
+    }
+
+    addTacticBucket(playerBucket, tacticAccuracy[playerSide]);
+    addTacticBucket(opponentBucket, tacticAccuracy[opponentSide]);
+    gamesWithAnalysis++;
+  }
+
+  return {
+    window: 30,
+    gamesConsidered: recentGames.length,
+    gamesWithAnalysis,
+    gamesWithoutAnalysis: Math.max(0, recentGames.length - gamesWithAnalysis),
+    player: finalizeTacticBucket(playerBucket),
+    opponents: finalizeTacticBucket(opponentBucket),
+  };
+}
+
+export { computeStats };

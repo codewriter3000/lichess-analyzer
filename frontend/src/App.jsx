@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import FileUpload from './components/FileUpload';
 import GameList from './components/GameList';
 import GameStats from './components/GameStats';
@@ -13,6 +13,17 @@ export default function App() {
   const [selectedGame, setSelectedGame] = useState(null);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const stored = localStorage.getItem('theme');
+    if (stored === 'dark') return true;
+    if (stored === 'light') return false;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', isDarkMode);
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+  }, [isDarkMode]);
 
   function handleUpload(uploadedGames, inferredUsername = '') {
     setGames(uploadedGames);
@@ -73,6 +84,17 @@ export default function App() {
         </nav>
         <div className="flex items-center gap-6">
           <span className="material-symbols-outlined topbar-icon-btn">menu_book</span>
+          <button
+            type="button"
+            className="topbar-icon-btn inline-flex items-center"
+            onClick={() => setIsDarkMode(prev => !prev)}
+            title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            <span className="material-symbols-outlined">
+              {isDarkMode ? 'light_mode' : 'dark_mode'}
+            </span>
+          </button>
           <span className="material-symbols-outlined topbar-icon-btn">settings</span>
           <div id="topbar-avatar">
             <span className="material-symbols-outlined text-on-primary text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>person</span>

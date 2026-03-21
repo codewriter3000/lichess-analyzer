@@ -6,7 +6,7 @@
 /* ── Board wrapper (border + shadow) ──────────────────── */
 .cb-board-wrap {
   @apply rounded-sm overflow-hidden shadow-md;
-  border: 2px solid rgba(22, 52, 40, 0.15);
+  border: 2px solid rgb(var(--color-primary) / 0.2);
 }
 
 /* ── Move info strip below the board ─────────────────── */

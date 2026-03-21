@@ -1,9 +1,9 @@
-const express = require('express');
-const cors = require('cors');
-const uploadRouter = require('./routes/upload');
-const statsRouter = require('./routes/stats');
-const analyzeRouter = require('./routes/analyze');
-const exportRouter = require('./routes/export');
+import express from 'express';
+import cors from 'cors';
+import uploadRouter from './routes/upload.js';
+import statsRouter from './routes/stats.js';
+import analyzeRouter from './routes/analyze.js';
+import exportRouter from './routes/export.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -14,6 +14,7 @@ app.use(express.json());
 
 // Shared in-memory store for parsed games
 app.locals.games = [];
+app.locals.analysisByGame = {};
 
 // Routes
 app.use('/api/upload', uploadRouter);
@@ -34,4 +35,4 @@ app.listen(PORT, () => {
   console.log(`Lichess Analyzer backend running on http://localhost:${PORT}`);
 });
 
-module.exports = app;
+export default app;

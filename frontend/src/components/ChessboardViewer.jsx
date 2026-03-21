@@ -11,6 +11,12 @@ const CLASSIFICATION_LABELS = {
   book:       { symbol: '',   label: 'Book',       cls: 'cb-badge-book'       },
 };
 
+function readRgbVar(varName, fallback) {
+  if (typeof window === 'undefined') return fallback;
+  const value = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+  return value || fallback;
+}
+
 /**
  * Pre-computes all FEN strings for a list of analysed moves.
  * Index 0 is the starting position; index i+1 is after moves[i].
@@ -80,10 +86,15 @@ export default function ChessboardViewer({ moves, selectedIndex, onSelectIndex }
   const currentMove = selectedIndex >= 0 ? moves[selectedIndex] : null;
 
   // Highlight the last-move squares
+  const boardDark = `rgb(${readRgbVar('--board-dark', '45 75 62')})`;
+  const boardLight = `rgb(${readRgbVar('--board-light', '254 249 240')})`;
+  const lastFrom = `rgb(${readRgbVar('--board-last-from', '119 87 77')} / 0.35)`;
+  const lastTo = `rgb(${readRgbVar('--board-last-to', '119 87 77')} / 0.58)`;
+
   const customSquareStyles = {};
   if (currentMove) {
-    customSquareStyles[currentMove.from] = { background: 'rgba(119, 87, 77, 0.35)' };
-    customSquareStyles[currentMove.to]   = { background: 'rgba(119, 87, 77, 0.55)' };
+    customSquareStyles[currentMove.from] = { background: lastFrom };
+    customSquareStyles[currentMove.to] = { background: lastTo };
   }
 
   const evalStr = currentMove?.evalAfter !== null && currentMove?.evalAfter !== undefined
@@ -102,8 +113,8 @@ export default function ChessboardViewer({ moves, selectedIndex, onSelectIndex }
           id="analysis-board"
           position={currentFen}
           arePiecesDraggable={false}
-          customDarkSquareStyle={{ backgroundColor: '#2d4b3e' }}
-          customLightSquareStyle={{ backgroundColor: '#fef9f0' }}
+          customDarkSquareStyle={{ backgroundColor: boardDark }}
+          customLightSquareStyle={{ backgroundColor: boardLight }}
           customSquareStyles={customSquareStyles}
           boardWidth={360}
         />

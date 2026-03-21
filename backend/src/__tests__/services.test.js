@@ -1,9 +1,9 @@
-const { describe, it } = require('node:test');
-const assert = require('node:assert/strict');
-const { parsePgn, inferUsername } = require('../services/pgnParser');
-const { computeStats } = require('../services/statsService');
-const { buildCsv } = require('../services/csvExport');
-const { getGamePhase, classifyTacticType } = require('../services/stockfishService');
+import { describe, it } from 'node:test';
+import assert from 'node:assert/strict';
+import { parsePgn, inferUsername } from '../services/pgnParser.js';
+import { computeStats } from '../services/statsService.js';
+import { buildCsv } from '../services/csvExport.js';
+import { getGamePhase, classifyTacticType } from '../services/stockfishService.js';
 
 // Sample PGN with 2 games
 const SAMPLE_PGN = `[Event "Rated Bullet game"]

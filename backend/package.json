@@ -2,6 +2,7 @@
   "name": "lichess-analyzer-backend",
   "version": "1.0.0",
   "description": "Backend for lichess PGN analyzer",
+  "type": "module",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",

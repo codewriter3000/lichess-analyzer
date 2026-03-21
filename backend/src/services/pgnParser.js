@@ -1,5 +1,5 @@
-const { Chess } = require('chess.js');
-const { eco } = require('chess-openings/dist/chess/openings/eco');
+import { Chess } from 'chess.js';
+import { eco } from 'chess-openings/dist/chess/openings/eco.js';
 
 const ECO_OPENING_NAMES = buildEcoOpeningNames();
 const ECO_NAME_OVERRIDES = {
@@ -172,4 +172,4 @@ function inferUsername(games) {
   return ranked[0].name;
 }
 
-module.exports = { parsePgn, inferUsername };
+export { parsePgn, inferUsername };

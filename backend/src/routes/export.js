@@ -1,5 +1,5 @@
-const express = require('express');
-const { buildCsv } = require('../services/csvExport');
+import express from 'express';
+import { buildCsv } from '../services/csvExport.js';
 
 const router = express.Router();
 
@@ -19,4 +19,4 @@ router.get('/csv', (req, res) => {
   res.send(csv);
 });
 
-module.exports = router;
+export default router;
