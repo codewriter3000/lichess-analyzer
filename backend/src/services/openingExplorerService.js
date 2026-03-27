@@ -155,6 +155,7 @@ function createNode() {
     _whiteEloSum: 0,
     _blackEloSum: 0,
     _eloCount: 0,
+    _openingDepth: 0,
   };
 }
 
@@ -164,6 +165,14 @@ function createNode() {
  */
 function buildExplorerTree(csvText) {
   const games = parseCsvGames(csvText);
+  return buildExplorerTreeFromGames(games);
+}
+
+/**
+ * Build an opening explorer trie from a pre-parsed array of game objects.
+ * Returns the root node of the trie.
+ */
+function buildExplorerTreeFromGames(games) {
   const root = createNode();
 
   for (const game of games) {
@@ -173,17 +182,18 @@ function buildExplorerTree(csvText) {
     const blackElo = parseInt(game.black_elo, 10) || 0;
     const opening = (game.opening || '').trim() || null;
     const eco = (game.eco || '').trim() || null;
+    const depth = moves.length;
 
     // Walk down the trie, updating each node along the path
     let node = root;
-    updateNode(node, result, whiteElo, blackElo, opening, eco, moves.length);
+    updateNode(node, result, whiteElo, blackElo, opening, eco, depth);
 
     for (const san of moves) {
       if (!node.children.has(san)) {
         node.children.set(san, createNode());
       }
       node = node.children.get(san);
-      updateNode(node, result, whiteElo, blackElo, opening, eco, moves.length);
+      updateNode(node, result, whiteElo, blackElo, opening, eco, depth);
     }
   }
 
@@ -195,10 +205,10 @@ function buildExplorerTree(csvText) {
 
 /**
  * Update a node with a game's result, ELO, and opening info.
- * The opening/eco are set to the value from the longest game path,
- * so deeper nodes get more specific opening names.
+ * Opening/eco are updated only when a game with a longer move sequence
+ * contributes, so deeper positions get more specific opening names.
  */
-function updateNode(node, result, whiteElo, blackElo, opening, eco, moveCount) {
+function updateNode(node, result, whiteElo, blackElo, opening, eco, gameDepth) {
   node.totalGames++;
 
   if (result === '1-0') node.whiteWins++;
@@ -211,11 +221,12 @@ function updateNode(node, result, whiteElo, blackElo, opening, eco, moveCount) {
     node._eloCount++;
   }
 
-  // Update opening name: prefer the most specific (from the game with more moves)
-  if (opening) {
+  // Prefer opening/eco from games with more moves (more specific classification)
+  if (opening && gameDepth >= node._openingDepth) {
     node.opening = opening;
+    node._openingDepth = gameDepth;
   }
-  if (eco) {
+  if (eco && gameDepth >= node._openingDepth) {
     node.eco = eco;
   }
 }
@@ -231,6 +242,7 @@ function finalizeAverages(node) {
   delete node._whiteEloSum;
   delete node._blackEloSum;
   delete node._eloCount;
+  delete node._openingDepth;
 
   for (const child of node.children.values()) {
     finalizeAverages(child);
@@ -282,4 +294,4 @@ function queryPosition(root, moveList) {
   };
 }
 
-export { buildExplorerTree, queryPosition, parseCsvGames };
+export { buildExplorerTree, buildExplorerTreeFromGames, queryPosition, parseCsvGames };

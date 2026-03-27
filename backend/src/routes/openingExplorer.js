@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import { buildExplorerTree, queryPosition, parseCsvGames } from '../services/openingExplorerService.js';
+import { buildExplorerTreeFromGames, queryPosition, parseCsvGames } from '../services/openingExplorerService.js';
 
 const router = express.Router();
 const upload = multer({
@@ -23,8 +23,8 @@ router.post('/', upload.single('csv'), (req, res) => {
   }
 
   const csvText = req.file.buffer.toString('utf8');
-  const tree = buildExplorerTree(csvText);
   const games = parseCsvGames(csvText);
+  const tree = buildExplorerTreeFromGames(games);
 
   req.app.locals.explorerTree = tree;
   req.app.locals.explorerGames = games;
