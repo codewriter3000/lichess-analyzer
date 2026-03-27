@@ -4,6 +4,7 @@ import GameList from './components/GameList';
 import GameStats from './components/GameStats';
 import StockfishAnalysis from './components/StockfishAnalysis';
 import TacticsDetailPage from './components/TacticsDetailPage';
+import TacticsPuzzle from './components/TacticsPuzzle';
 import ExportButton from './components/ExportButton';
 import OpeningExplorer from './components/OpeningExplorer';
 import './App.css';
@@ -12,6 +13,7 @@ export default function App() {
   const [games, setGames] = useState([]);
   const [username, setUsername] = useState('');
   const [activeTab, setActiveTab] = useState('library');
+  const [tacticsMode, setTacticsMode] = useState('puzzles'); // 'puzzles' | 'explorer'
   const [selectedGame, setSelectedGame] = useState(null);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -216,7 +218,29 @@ export default function App() {
           )}
 
           {games.length > 0 && activeTab === 'tactics' && (
-            <TacticsDetailPage username={username} />
+            <>
+              {/* Mode switcher */}
+              <div className="flex gap-2 mb-6">
+                <button
+                  type="button"
+                  className={`puzzle-type-chip${tacticsMode === 'puzzles' ? ' active' : ''}`}
+                  onClick={() => setTacticsMode('puzzles')}
+                >
+                  <span className="material-symbols-outlined text-sm mr-1" style={{ verticalAlign: 'middle' }}>extension</span>
+                  Puzzles
+                </button>
+                <button
+                  type="button"
+                  className={`puzzle-type-chip${tacticsMode === 'explorer' ? ' active' : ''}`}
+                  onClick={() => setTacticsMode('explorer')}
+                >
+                  <span className="material-symbols-outlined text-sm mr-1" style={{ verticalAlign: 'middle' }}>manage_search</span>
+                  Explorer
+                </button>
+              </div>
+              {tacticsMode === 'puzzles' && <TacticsPuzzle />}
+              {tacticsMode === 'explorer' && <TacticsDetailPage username={username} />}
+            </>
           )}
 
           {activeTab === 'analysis' && (

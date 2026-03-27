@@ -1,0 +1,72 @@
+.puzzle-loading-card {
+  @apply content-card p-12 flex items-center gap-3 font-label text-sm uppercase tracking-widest text-primary/60;
+}
+
+.puzzle-error-card {
+  @apply content-card p-6 text-chess-danger font-body text-sm;
+}
+
+/* ── Filter chips ────────────────────────────────────────── */
+
+.puzzle-type-chip {
+  @apply px-3 py-1.5 rounded-sm border border-primary/20 font-label text-xs uppercase
+         tracking-widest text-primary/60 bg-transparent
+         hover:bg-surface-container-high hover:text-primary transition-colors cursor-pointer;
+}
+
+.puzzle-type-chip.active {
+  @apply bg-primary text-on-primary border-primary;
+}
+
+/* ── Board wrapper ───────────────────────────────────────── */
+
+.puzzle-board-wrap {
+  @apply rounded-sm overflow-hidden shadow-md;
+  border: 2px solid rgb(var(--color-primary) / 0.2);
+}
+
+/* ── Feedback message ────────────────────────────────────── */
+
+.puzzle-feedback {
+  @apply flex items-center font-label text-sm uppercase tracking-widest font-semibold;
+}
+
+.puzzle-feedback.correct {
+  @apply text-chess-success;
+}
+
+.puzzle-feedback.incorrect {
+  @apply text-chess-danger;
+}
+
+/* ── Navigation buttons ──────────────────────────────────── */
+
+.puzzle-nav-btn {
+  @apply flex items-center justify-center w-9 h-9 rounded-sm
+         text-primary/60 hover:text-primary hover:bg-surface-container-high
+         disabled:opacity-25 disabled:cursor-not-allowed transition-colors;
+}
+
+.puzzle-nav-btn .material-symbols-outlined {
+  font-size: 1.25rem;
+}
+
+.puzzle-next-btn {
+  @apply flex items-center px-4 py-1.5 rounded-sm bg-primary text-on-primary
+         font-label text-xs uppercase tracking-widest
+         hover:bg-secondary transition-colors disabled:opacity-30 disabled:cursor-not-allowed;
+}
+
+/* ── Puzzle info rows ────────────────────────────────────── */
+
+.puzzle-info-row {
+  @apply flex items-start justify-between gap-2;
+}
+
+.puzzle-info-label {
+  @apply font-label text-[11px] uppercase tracking-widest text-primary/40 shrink-0;
+}
+
+.puzzle-info-value {
+  @apply font-body text-sm text-primary text-right;
+}
