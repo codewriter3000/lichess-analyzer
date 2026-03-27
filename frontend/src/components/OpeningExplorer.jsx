@@ -9,6 +9,10 @@ function readRgbVar(varName, fallback) {
   return value || fallback;
 }
 
+function formatMoveNumber(index) {
+  return `${Math.floor(index / 2) + 1}${index % 2 === 0 ? '.' : '…'}`;
+}
+
 export default function OpeningExplorer() {
   const [tree, setTree] = useState(null);
   const [totalGames, setTotalGames] = useState(0);
@@ -229,7 +233,7 @@ export default function OpeningExplorer() {
                 className={`oe-crumb-btn${i === movePath.length - 1 ? ' active' : ''}`}
                 onClick={() => handleGoToMove(i + 1)}
               >
-                {i % 2 === 0 ? `${Math.floor(i / 2) + 1}.` : `${Math.floor(i / 2) + 1}…`}{san}
+                {formatMoveNumber(i)}{san}
               </button>
             </span>
           ))}
@@ -270,7 +274,7 @@ export default function OpeningExplorer() {
               <span className="material-symbols-outlined">chevron_left</span>
             </button>
             <span className="font-label text-xs uppercase tracking-widest text-primary/40 w-12 text-center">
-              {movePath.length === 0 ? 'Start' : `${Math.floor((movePath.length - 1) / 2) + 1}${(movePath.length - 1) % 2 === 0 ? '.' : '…'}`}
+              {movePath.length === 0 ? 'Start' : formatMoveNumber(movePath.length - 1)}
             </span>
             <button
               className="oe-nav-btn"
@@ -393,7 +397,7 @@ export default function OpeningExplorer() {
                       </td>
                       <td>
                         <span className="oe-avg-rating">
-                          {move.avgWhiteElo > 0 ? Math.round((move.avgWhiteElo + move.avgBlackElo) / 2) : '—'}
+                          {move.avgWhiteElo > 0 && move.avgBlackElo > 0 ? Math.round((move.avgWhiteElo + move.avgBlackElo) / 2) : '—'}
                         </span>
                       </td>
                     </tr>

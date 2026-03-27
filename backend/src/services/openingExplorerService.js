@@ -222,12 +222,10 @@ function updateNode(node, result, whiteElo, blackElo, opening, eco, gameDepth) {
   }
 
   // Prefer opening/eco from games with more moves (more specific classification)
-  if (opening && gameDepth >= node._openingDepth) {
-    node.opening = opening;
+  if ((opening || eco) && gameDepth >= node._openingDepth) {
+    if (opening) node.opening = opening;
+    if (eco) node.eco = eco;
     node._openingDepth = gameDepth;
-  }
-  if (eco && gameDepth >= node._openingDepth) {
-    node.eco = eco;
   }
 }
 
