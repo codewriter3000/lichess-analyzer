@@ -1,0 +1,239 @@
+/* ── Opening Explorer root ────────────────────────────── */
+
+.oe-upload-zone {
+  @apply content-card p-8 flex flex-col items-center gap-4 cursor-pointer
+         border-2 border-dashed border-primary/20 hover:border-primary/40 transition-colors;
+}
+
+.oe-upload-zone.dragging {
+  @apply border-primary/60 bg-surface-container-high;
+}
+
+.oe-upload-icon {
+  @apply text-primary/30;
+  font-size: 3rem;
+}
+
+.oe-upload-label {
+  @apply font-headline text-lg text-primary;
+}
+
+.oe-upload-hint {
+  @apply font-label text-xs uppercase tracking-widest text-primary/40;
+}
+
+.oe-upload-file-label {
+  @apply font-body text-sm text-chess-success;
+}
+
+.oe-upload-error {
+  @apply font-body text-sm text-chess-danger;
+}
+
+.oe-upload-btn {
+  @apply bg-primary text-on-primary px-6 py-2.5 rounded-sm font-label text-xs
+         uppercase tracking-widest transition-opacity disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.oe-upload-btn:hover {
+  @apply opacity-90;
+}
+
+/* ── Layout grid ─────────────────────────────────────── */
+
+.oe-layout {
+  @apply grid grid-cols-1 lg:grid-cols-12 gap-6;
+}
+
+.oe-board-col {
+  @apply lg:col-span-5 flex flex-col items-center gap-4;
+}
+
+.oe-data-col {
+  @apply lg:col-span-7 flex flex-col gap-6;
+}
+
+/* ── Opening name header ─────────────────────────────── */
+
+.oe-opening-header {
+  @apply content-card p-6;
+}
+
+.oe-opening-name {
+  @apply font-headline text-xl text-primary;
+}
+
+.oe-eco-badge {
+  @apply inline-block ml-2 px-2 py-0.5 bg-secondary/10 text-secondary
+         font-label text-xs uppercase tracking-widest rounded-sm;
+}
+
+.oe-position-stats {
+  @apply flex items-center gap-6 mt-3 flex-wrap;
+}
+
+.oe-stat-item {
+  @apply font-label text-xs uppercase tracking-widest text-primary/60;
+}
+
+.oe-stat-value {
+  @apply font-headline text-lg text-primary font-semibold mr-1;
+}
+
+/* ── Move table ──────────────────────────────────────── */
+
+.oe-move-table-card {
+  @apply content-card overflow-hidden;
+}
+
+.oe-move-table-header {
+  @apply flex justify-between items-center p-6 pb-4 border-b border-primary/5;
+}
+
+.oe-move-table {
+  @apply w-full;
+}
+
+.oe-move-table th {
+  @apply px-4 py-3 font-label text-[10px] uppercase tracking-widest text-primary/40
+         text-left border-b border-primary/5;
+}
+
+.oe-move-table th:last-child {
+  @apply text-right;
+}
+
+.oe-move-row {
+  @apply cursor-pointer transition-colors;
+}
+
+.oe-move-row:hover {
+  @apply bg-surface-container-high;
+}
+
+.oe-move-row td {
+  @apply px-4 py-3;
+}
+
+.oe-move-san {
+  @apply font-headline text-base text-primary font-semibold;
+}
+
+.oe-move-games {
+  @apply font-body text-sm text-primary/70;
+}
+
+.oe-move-pct {
+  @apply font-label text-xs text-primary/50;
+}
+
+/* ── Results bar (inline win/draw/loss bar) ──────────── */
+
+.oe-results-bar-wrap {
+  @apply flex items-center gap-2;
+}
+
+.oe-results-bar {
+  @apply flex h-4 w-full max-w-[200px] rounded-sm overflow-hidden;
+}
+
+.oe-bar-white {
+  @apply bg-primary h-full;
+  min-width: 1px;
+}
+
+.oe-bar-draw {
+  @apply bg-primary/25 h-full;
+  min-width: 1px;
+}
+
+.oe-bar-black {
+  @apply bg-chess-danger h-full;
+  min-width: 1px;
+}
+
+.oe-bar-label {
+  @apply font-label text-[10px] text-primary/40;
+}
+
+/* ── Avg rating ──────────────────────────────────────── */
+
+.oe-avg-rating {
+  @apply font-body text-sm text-primary/50 text-right;
+}
+
+/* ── Move path breadcrumb ────────────────────────────── */
+
+.oe-breadcrumb {
+  @apply flex items-center gap-1 flex-wrap;
+}
+
+.oe-crumb-btn {
+  @apply px-1.5 py-0.5 rounded-sm font-headline text-sm text-primary/70
+         hover:bg-surface-container-high hover:text-primary transition-colors cursor-pointer;
+}
+
+.oe-crumb-btn.active {
+  @apply text-primary font-semibold bg-surface-container-high;
+}
+
+.oe-crumb-sep {
+  @apply text-primary/20 font-label text-xs;
+}
+
+.oe-crumb-start {
+  @apply font-label text-xs uppercase tracking-widest text-primary/40
+         hover:text-primary cursor-pointer transition-colors;
+}
+
+/* ── Loading state ───────────────────────────────────── */
+
+.oe-loading {
+  @apply flex items-center gap-3 py-12 text-primary/60
+         font-label text-sm uppercase tracking-widest;
+}
+
+/* ── Empty state ─────────────────────────────────────── */
+
+.oe-empty {
+  @apply text-center py-12;
+}
+
+.oe-empty-icon {
+  @apply text-primary/20 mb-4;
+  font-size: 3rem;
+}
+
+.oe-empty-text {
+  @apply font-label text-xs uppercase tracking-widest text-primary/30;
+}
+
+/* ── Board wrapper ───────────────────────────────────── */
+
+.oe-board-wrap {
+  @apply rounded-sm overflow-hidden shadow-md;
+  border: 2px solid rgb(var(--color-primary) / 0.2);
+}
+
+/* ── Navigation row ──────────────────────────────────── */
+
+.oe-nav {
+  @apply flex items-center gap-1;
+}
+
+.oe-nav-btn {
+  @apply flex items-center justify-center w-9 h-9 rounded-sm
+         text-primary/60 hover:text-primary hover:bg-surface-container-high
+         disabled:opacity-25 disabled:cursor-not-allowed
+         transition-colors;
+}
+
+.oe-nav-btn .material-symbols-outlined {
+  font-size: 1.25rem;
+}
+
+/* ── Game count badge ────────────────────────────────── */
+
+.oe-game-count {
+  @apply font-label text-xs uppercase tracking-widest text-primary/50;
+}
