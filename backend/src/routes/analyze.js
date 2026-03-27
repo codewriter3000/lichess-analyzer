@@ -2,6 +2,7 @@ import express from 'express';
 import { randomUUID } from 'crypto';
 import { analyzeGame } from '../services/stockfishService.js';
 import { getCachedAnalysis, setCachedAnalysis } from '../services/analysisCache.js';
+import { extractPuzzlesFromAnalysis, savePuzzlesForGame } from '../services/tacticsPuzzleCache.js';
 
 const router = express.Router();
 
@@ -102,6 +103,11 @@ router.post('/', async (req, res) => {
       req.app.locals.analysisByGame = {};
     }
     req.app.locals.analysisByGame[gameIndex] = result;
+
+    // Persist tactic puzzle positions to disk cache (fire-and-forget; errors are non-fatal)
+    const puzzles = extractPuzzlesFromAnalysis(games[gameIndex], result);
+    savePuzzlesForGame(games[gameIndex], puzzles).catch(() => {});
+
     res.json({ ...result, meta: { fromCache, depth } });
   } catch (err) {
     res.status(500).json({ error: 'Analysis failed: ' + err.message });
@@ -157,6 +163,11 @@ router.post('/batch-last30', (req, res) => {
           try {
             const { result, fromCache } = await analyzeWithCache(games[current], depth);
             req.app.locals.analysisByGame[current] = result;
+
+            // Persist tactic puzzle positions to disk cache (fire-and-forget)
+            const puzzles = extractPuzzlesFromAnalysis(games[current], result);
+            savePuzzlesForGame(games[current], puzzles).catch(() => {});
+
             if (fromCache) {
               job.skipped++;
             } else {

@@ -6,6 +6,7 @@ import statsRouter from './routes/stats.js';
 import analyzeRouter from './routes/analyze.js';
 import exportRouter from './routes/export.js';
 import openingExplorerRouter from './routes/openingExplorer.js';
+import tacticsRouter from './routes/tactics.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -24,6 +25,7 @@ app.use('/api/stats', statsRouter);
 app.use('/api/analyze', analyzeRouter);
 app.use('/api/export', exportRouter);
 app.use('/api/opening-explorer', openingExplorerRouter);
+app.use('/api/tactics', tacticsRouter);
 
 // Health check
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));

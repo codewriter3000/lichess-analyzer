@@ -389,6 +389,7 @@ function classifyMoves(evaluations, moves, fens) {
       san: move.san,
       from: move.from,
       to: move.to,
+      fenBefore,
       evalBefore,
       evalAfter,
       cploss: Math.round(cploss),

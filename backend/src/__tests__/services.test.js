@@ -295,3 +295,117 @@ describe('Stockfish Service – classifyTacticType', () => {
     assert.equal(classifyTacticType('e1e4', captureFen), 'capture');
   });
 });
+
+import { extractPuzzlesFromAnalysis } from '../services/tacticsPuzzleCache.js';
+
+describe('Tactics Puzzle Cache – extractPuzzlesFromAnalysis', () => {
+  const DUMMY_GAME = {
+    pgn: '1. e4 e5 2. Nf3 Nc6 3. Bb5 1-0',
+    white: 'Magnus',
+    black: 'Hikaru',
+    date: '2024-01-01',
+    opening: 'Ruy Lopez',
+  };
+
+  it('returns empty array when analysis has no moves', () => {
+    const result = extractPuzzlesFromAnalysis(DUMMY_GAME, { moves: [] });
+    assert.deepEqual(result, []);
+  });
+
+  it('returns empty array when analysisResult is null', () => {
+    const result = extractPuzzlesFromAnalysis(DUMMY_GAME, null);
+    assert.deepEqual(result, []);
+  });
+
+  it('extracts a puzzle for a move with a tactic, bestMove, and fenBefore', () => {
+    const fenBefore = 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1';
+    const moves = [
+      {
+        moveNumber: 1,
+        color: 'white',
+        san: 'e4',
+        from: 'e2',
+        to: 'e4',
+        fenBefore,
+        tactic: { type: 'check', found: true },
+        bestMove: 'e2e4',
+        cploss: 0,
+        classification: 'good',
+      },
+    ];
+    const puzzles = extractPuzzlesFromAnalysis(DUMMY_GAME, { moves });
+    assert.equal(puzzles.length, 1);
+    assert.equal(puzzles[0].fen, fenBefore);
+    assert.equal(puzzles[0].bestMove, 'e2e4');
+    assert.equal(puzzles[0].tacticType, 'check');
+    assert.equal(puzzles[0].found, true);
+    assert.equal(puzzles[0].gameInfo.white, 'Magnus');
+    assert.equal(puzzles[0].gameInfo.black, 'Hikaru');
+  });
+
+  it('skips moves that have no tactic', () => {
+    const moves = [
+      {
+        moveNumber: 1,
+        color: 'white',
+        san: 'e4',
+        from: 'e2',
+        to: 'e4',
+        fenBefore: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+        tactic: null,
+        bestMove: 'e2e4',
+        cploss: 5,
+      },
+    ];
+    const puzzles = extractPuzzlesFromAnalysis(DUMMY_GAME, { moves });
+    assert.equal(puzzles.length, 0);
+  });
+
+  it('skips moves that have no bestMove', () => {
+    const moves = [
+      {
+        moveNumber: 1,
+        color: 'white',
+        san: 'e4',
+        fenBefore: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1',
+        tactic: { type: 'fork', found: false },
+        bestMove: null,
+        cploss: 150,
+      },
+    ];
+    const puzzles = extractPuzzlesFromAnalysis(DUMMY_GAME, { moves });
+    assert.equal(puzzles.length, 0);
+  });
+
+  it('skips moves that have no fenBefore', () => {
+    const moves = [
+      {
+        moveNumber: 1,
+        color: 'white',
+        san: 'e4',
+        fenBefore: null,
+        tactic: { type: 'fork', found: false },
+        bestMove: 'e2e4',
+        cploss: 150,
+      },
+    ];
+    const puzzles = extractPuzzlesFromAnalysis(DUMMY_GAME, { moves });
+    assert.equal(puzzles.length, 0);
+  });
+
+  it('assigns stable unique IDs derived from game key and move index', () => {
+    const fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+    const moves = [
+      { moveNumber: 1, color: 'white', san: 'e4', from: 'e2', to: 'e4',
+        fenBefore: fen, tactic: { type: 'fork', found: true }, bestMove: 'e2e4', cploss: 0 },
+      { moveNumber: 1, color: 'black', san: 'e5', from: 'e7', to: 'e5',
+        fenBefore: fen, tactic: { type: 'capture', found: false }, bestMove: 'e7e5', cploss: 120 },
+    ];
+    const puzzles = extractPuzzlesFromAnalysis(DUMMY_GAME, { moves });
+    assert.equal(puzzles.length, 2);
+    assert.notEqual(puzzles[0].id, puzzles[1].id);
+    // IDs should be stable for the same game + move index
+    const puzzles2 = extractPuzzlesFromAnalysis(DUMMY_GAME, { moves });
+    assert.equal(puzzles[0].id, puzzles2[0].id);
+  });
+});
